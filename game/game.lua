@@ -1,3 +1,5 @@
+-- Независимость! 🗽
+
 --
 -- Все что не получится найти здесь, ищи в game_helpers.lua
 --
@@ -93,10 +95,14 @@ function game.load()
     game.obj.alarm_area_total_height = 0
 
     game.current_minigame = nil
+    game.mouse_just_pressed = false
+    game.can_click = false
 end
 
 function game.update(dt)
+    game.mouse_just_pressed = game.input.mouse.just_pressed
     lurker.update()
+    game.can_click = false
 
     local screen_width, screen_height = love.graphics.getDimensions()
 
@@ -115,14 +121,17 @@ function game.update(dt)
     for _, alarm in ipairs(game.obj.alarms) do
         alarm:update(dt)
 
+        local mouse_x, mouse_y = translate_mouse_screen_to_canvas_coords(game.input.mouse.x, game.input.mouse.y)
+
         local ox = (game.graphics.alarm_area_canvas:getWidth() - config.actual_alarm_area_width) / 2.0
-        local x = ox + config.shelf.x_pad
-        local y = config.shelf.pad + -1 * (game.obj.alarm_area_total_height - screen_height) * game.obj.alarm_area.scrollbar.scroll
+        local x = ox + config.shelf.x_pad + alarm.x_position + alarm.offset_x
+        local y = config.shelf.margin_top + config.shelf.pad + -1 * (game.obj.alarm_area_total_height - screen_height) * game.obj.alarm_area.scrollbar.scroll
         y = y + (alarm.shelf - 1) * (config.shelf.height + config.shelf.pad)
         y = y - game.assets.images.aquarium:getHeight()
 
         local alarm_rect = alarm.config.hitbox:to_rect(x, y)
         if alarm_rect:intersect_point(mouse_x, mouse_y) then
+            game.can_click = true
             if alarm.timer:done() and game.input.mouse.just_pressed then
                 game.current_minigame = alarm.config.Minigame(alarm)
             end
@@ -160,6 +169,7 @@ function game.update(dt)
         local button_rect = button.hitbox:to_rect(button.position.x, button.position.y)
 
         if button_rect:intersect_point(mouse_x, mouse_y) then
+            game.can_click = true
             button.hovered = true
             if game.input.mouse.just_pressed then
                 if game.bank:can_buy(button.alarm) then
@@ -209,7 +219,19 @@ function game.draw()
     love.graphics.setCanvas(alarm_area_canvas)
     game.draw_alarm_area(game, offset_x, offset_y, config.actual_alarm_area_width, screen_height)
     if game.current_minigame then
-        game.current_minigame:draw(Rect(offset_x, offset_y, config.actual_alarm_area_width, screen_height))
+        love.graphics.push()
+        love.graphics.translate(offset_x, offset_y)
+
+        local mouse_x, mouse_y = translate_mouse_screen_to_canvas_coords(game.input.mouse.x, game.input.mouse.y)
+        print(mouse_x)
+        local mouse = {
+            x = mouse_x - offset_x,
+            y = mouse_y - offset_y,
+            just_pressed = game.mouse_just_pressed,
+            pressed = game.input.mouse.pressed,
+        }
+        game.current_minigame:draw(screen_height, mouse)
+        love.graphics.pop()
     end
     love.graphics.setCanvas()
 
@@ -218,8 +240,11 @@ function game.draw()
     game.draw_shop_area(game, shop_rect.x, 0, shop_width, screen_height)
 
     local cursor_sprite = game.assets.images["release_cursor-vector"]
+    if game.can_click then
+        cursor_sprite = game.assets.images["release_finger-vector"]
+    end
     local cursor_scale = config.cursor_size / cursor_sprite:getWidth()
-    love.graphics.draw(cursor_sprite, game.input.mouse.x, game.input.mouse.y, 0, cursor_scale)
+    love.graphics.draw(cursor_sprite, game.input.mouse.x - 6, game.input.mouse.y, 0, cursor_scale)
 
     love.graphics.print(game.bank.money .. "$", game.assets.fonts.shop, 0, 0)
 end
@@ -243,6 +268,7 @@ function game.draw_alarm_area(game, ox, oy, w, h)
 
     local over = false
     for _, alarm in ipairs(game.obj.alarms) do
+        local ox = (game.graphics.alarm_area_canvas:getWidth() - config.actual_alarm_area_width) / 2.0
         local x = ox + config.shelf.x_pad + alarm.x_position + alarm.offset_x
         local y = config.shelf.margin_top + config.shelf.pad + -1 * (game.obj.alarm_area_total_height - h) * game.obj.alarm_area.scrollbar.scroll
         y = y + (alarm.shelf - 1) * (config.shelf.height + config.shelf.pad)
