@@ -40,6 +40,8 @@ function game.load()
         countdown = createGrid(33, 27, game.assets.images.release_countdown),
         aquarium_clock = createGrid(13, 13, game.assets.images["release_aquarium-clock"]),
         clock_clock = createGrid(43, 32, game.assets.images.release_clock_clock),
+
+        fishing_minigame_window = createGrid(374, 185, game.assets.images.release_box_fishing_minigame),
     }
 
     local grids = game.assets.images.grids
@@ -55,9 +57,13 @@ function game.load()
     game.animations["aquarium_press_out"] = anim8.newAnimation(grids.aquarium('6-8', 1), 0.05)
     game.animations["aquarium_idle"] = anim8.newAnimation(grids.aquarium(1, 1), 1)
 
+    -- на подумать: ускорить секунды
     game.animations["countdown"] = anim8.newAnimation(grids.countdown('1-100', 1), 1)
     game.animations["aquarium_clock"] = anim8.newAnimation(grids.aquarium_clock('1-20', 1), 1)
     game.animations["clock_clock"] = anim8.newAnimation(grids.clock_clock('1-60', 1), 1)
+
+    -- волны в аквариуме 🫠
+    game.animations["fishing_minigame_window_idle"] = anim8.newAnimation(grids.fishing_minigame_window('1-2', 1), 0.5)
 
     -- Игровые объекты
     game.bank = Bank(config.starting_money)
@@ -201,7 +207,7 @@ function game.draw()
             just_pressed = game.player.mouse_just_pressed,
             pressed = game.input.mouse.pressed,
         }
-        print(game.alarm.rect.h)
+        -- print(game.alarm.rect.h)
         game.minigame:draw(game.alarm.rect.h, mouse)
     end
     love.graphics.setCanvas()

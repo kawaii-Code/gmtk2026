@@ -10,6 +10,7 @@ Stopwatch = require('game.Stopwatch')
 ShopButton = require('game.ShopButton')
 Scrollbar = require('game.Scrollbar')
 SimpleClickMinigame = require('game.SimpleClickMinigame')
+FishingMinigame = require('game.FishingMinigame')
 Bank = require('game.Bank')
 
 require('game.game')
@@ -60,7 +61,7 @@ config.shop = {
     button_spacing = 15,
 }
 
-config.starting_money = 10
+config.starting_money = 10000
 
 config.cursor_size = 40
 
@@ -97,7 +98,7 @@ config.alarms = {
         Minigame = SimpleClickMinigame,
     },
     {
-        name = "crab",
+        name = "aquarium",
         shop_icon = "icon",
         cost = 30,
         earn = 10,
@@ -109,7 +110,7 @@ config.alarms = {
         animation_full_path = "release_aquarium-clock",
         sprite_name = "release_aquarium",
         sprite_name_mini = "aquarium",
-        Minigame = SimpleClickMinigame,
+        Minigame = FishingMinigame,
     },
 }
 
