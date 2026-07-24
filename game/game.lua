@@ -66,6 +66,8 @@ function game.load()
 
     game.obj.time = Stopwatch()
 
+    love.mouse.setVisible(false)
+
     local first = true
 
     game.obj.alarm_area = {
@@ -215,6 +217,10 @@ function game.draw()
 
     game.draw_shop_area(game, shop_rect.x, 0, shop_width, screen_height)
 
+    local cursor_sprite = game.assets.images["release_cursor-vector"]
+    local cursor_scale = config.cursor_size / cursor_sprite:getWidth()
+    love.graphics.draw(cursor_sprite, game.input.mouse.x, game.input.mouse.y, 0, cursor_scale)
+
     love.graphics.print(game.bank.money .. "$", game.assets.fonts.shop, 0, 0)
 end
 
@@ -227,7 +233,7 @@ function game.draw_alarm_area(game, ox, oy, w, h)
     local mouse_x, mouse_y = translate_mouse_screen_to_canvas_coords(game.input.mouse.x, game.input.mouse.y)
 
     local x = 0
-    local y = config.shelf.pad + -1 * (game.obj.alarm_area_total_height - h) * game.obj.alarm_area.scrollbar.scroll
+    local y = config.shelf.margin_top + config.shelf.pad + -1 * (game.obj.alarm_area_total_height - h) * game.obj.alarm_area.scrollbar.scroll
     for _ = 1, game.obj.shelf_count do
         love.graphics.setColor({0.8, 0.7, 0.7, 1})
         love.graphics.rectangle('fill', ox + config.shelf.x_pad + x, y, w - 2 * config.shelf.x_pad, config.shelf.height)
@@ -238,7 +244,7 @@ function game.draw_alarm_area(game, ox, oy, w, h)
     local over = false
     for _, alarm in ipairs(game.obj.alarms) do
         local x = ox + config.shelf.x_pad + alarm.x_position + alarm.offset_x
-        local y = config.shelf.pad + -1 * (game.obj.alarm_area_total_height - h) * game.obj.alarm_area.scrollbar.scroll
+        local y = config.shelf.margin_top + config.shelf.pad + -1 * (game.obj.alarm_area_total_height - h) * game.obj.alarm_area.scrollbar.scroll
         y = y + (alarm.shelf - 1) * (config.shelf.height + config.shelf.pad)
         y = y - game.assets.images.aquarium:getHeight()
 

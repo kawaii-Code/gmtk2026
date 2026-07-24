@@ -25,7 +25,7 @@ function load_images_from_directory(directory)
     local images = {}
     for _, item in ipairs(files) do
         local ext = item:match("%.([%w]+)$")
-        if ext and ext ~= "aseprite" then
+        if ext and ext == "png" then
             local name = item:sub(16, #item - (#ext + 1))
             name = name:gsub("/", "_")
             images[name] = love.graphics.newImage(item)

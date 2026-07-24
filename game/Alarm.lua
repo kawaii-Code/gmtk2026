@@ -4,7 +4,8 @@ local Alarm = require('libraries.knife.base'):extend()
 
 function Alarm:constructor(config, shelf)
     self.config = config
-    self.shelf = shelf
+    self.shelf = config.shelf
+    assert(config.shelf)
 
     print(self.config.name)
     print(self.config.Minigame)

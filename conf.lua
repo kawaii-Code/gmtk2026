@@ -34,6 +34,8 @@ config.shop = {
 
 config.starting_money = 10
 
+config.cursor_size = 40
+
 config.scrollbar_width = 25
 
 config.alarms = {
@@ -43,6 +45,7 @@ config.alarms = {
         cost = 10,
         earn = 5,
         time = 3,
+        shelf = 1,
         hitbox = Hitbox(0, 0, 130, 130),
         Minigame = SimpleClickMinigame,
     },
@@ -52,6 +55,8 @@ config.alarms = {
         cost = 10,
         earn = 5,
         time = 3,
+        shelf = 1,
+        x_position = 150,
         hitbox = Hitbox(0, 0, 130, 130),
         Minigame = SimpleClickMinigame,
     },
@@ -61,6 +66,7 @@ config.alarms = {
         cost = 30,
         earn = 10,
         time = 10,
+        shelf = 2,
         hitbox = Hitbox(0, 0, 130, 130),
         Minigame = SimpleClickMinigame,
     },
@@ -68,9 +74,10 @@ config.alarms = {
 
 
 config.shelf = {
+    margin_top = 100,
     x_pad = 5,
     height = 20,
-    pad = 60,
+    pad = 50,
 }
 
 config.shop_horizontal_screen_percentage = 0.3  -- 30% по горизонтали занимает магазин
