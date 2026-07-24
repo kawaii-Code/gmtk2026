@@ -44,5 +44,9 @@ function Rect:draw(color, mode)
     love.graphics.setColor({1, 1, 1, 1})
 end
 
+function Rect:clone()
+    return Rect(self.x, self.y, self.w, self.h)
+end
+
 return Rect
 

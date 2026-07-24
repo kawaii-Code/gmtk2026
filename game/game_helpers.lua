@@ -91,10 +91,20 @@ function draw_text_inside_rect(text, rect, align)
     end
 end
 
+function draw_sprite_inside_rect(sprite, rect)
+    local scale = math.min(rect.w / sprite:getWidth(), rect.h / sprite:getHeight())
+    love.graphics.draw(sprite, rect.x, rect.y, 0, scale)
+end
+
 function draw_text_centered(text, x, y, font)
     font = font or game.assets.fonts.shop[18]
     local text_width = font:getWidth(text)
     love.graphics.print(text, font, x - text_width * 0.5, y)
+end
+
+function draw_rectangle(r, mode)
+    mode = mode or 'line'
+    love.graphics.rectangle(mode, r.x, r.y, r.w, r.h)
 end
 
 

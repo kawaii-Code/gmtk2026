@@ -39,9 +39,8 @@ function game.load()
         aquarium = createGrid(150, 150, game.assets.images.release_aquarium),
         countdown = createGrid(33, 27, game.assets.images.release_countdown),
         aquarium_clock = createGrid(13, 13, game.assets.images["release_aquarium-clock"]),
-        clock_clock = createGrid(43, 32, game.assets.images.release_clock_clock),
-
         fishing_minigame_window = createGrid(374, 185, game.assets.images.release_box_fishing_minigame),
+        clock_clock = createGrid(43, 43, game.assets.images.release_clock_clock),
     }
 
     local grids = game.assets.images.grids
@@ -88,9 +87,7 @@ function game.load()
         content_height = 0,
     }
     for _, config in ipairs(config.alarms) do
-        for i = 1, 3 do
-            table.insert(game.shop.buttons, ShopButton(config))
-        end
+        table.insert(game.shop.buttons, ShopButton(config))
     end
 
     -- Будильники
@@ -165,11 +162,14 @@ function game.update(dt)
             game.player.can_click = true
             button.hovered = true
             if game.input.mouse.just_pressed then
-                if game.bank:can_buy(button.alarm) then
+                if not button.second_mode and game.bank:can_buy(button.alarm) then
                     game.bank:buy(button.alarm)
+                    button:on_buy()
                     button.bought = true
                     local alarm = Alarm(button.alarm)
                     table.insert(game.alarms, alarm)
+                else
+                    game.assets.sounds.error:play()
                 end
             end
         else
@@ -283,42 +283,7 @@ function game.draw_shop_area()
         local scale, offset_x = button:layout(rect.w, config.shop.margin_left)
         local x = button.position.x + offset_x
         local y = button.position.y
-
-        local button_sprite = game.assets.images.button_off
-        if game.bank:can_buy(button.alarm) then
-            button_sprite = game.assets.images.button_on
-        end
-        love.graphics.draw(button_sprite, x, y, 0, scale)
-        love.graphics.draw(game.assets.images.bonus_icons, x, y, 0, scale)
-        love.graphics.draw(game.assets.images.icon, x, y, 0, scale)
-
-        local text_1_rect = Rect(
-            x + button.hitbox.width * 0.22,
-            y + button.hitbox.height * 0.14,
-            button.hitbox.width * 0.4,
-            button.hitbox.height * 0.28
-        )
-
-        local text_2_rect = Rect(
-            x + button.hitbox.width * 0.22,
-            text_1_rect.y + button.hitbox.height * 0.38,
-            button.hitbox.width * 0.4,
-            button.hitbox.height * 0.28
-        )
-
-        local cost_text_rect = Rect(
-            x + button.hitbox.width * 0.58,
-            text_1_rect.y + button.hitbox.height * 0.38,
-            button.hitbox.width * 0.4,
-            button.hitbox.height * 0.28
-        )
-
-        local tip_x = x + button.hitbox.width * 0.24
-        local y1 = y + button.hitbox.height * 0.17
-        local y2 = y1 + button.hitbox.height * 0.39
-        draw_text_inside_rect(button.alarm.time, text_1_rect)
-        draw_text_inside_rect("+" .. button.alarm.earn, text_2_rect)
-        draw_text_inside_rect(button.alarm.cost, cost_text_rect, 'center')
+        button:draw(x, y, scale, offset_x)
     end
 
     local screen_width, screen_height = love.graphics.getDimensions()
