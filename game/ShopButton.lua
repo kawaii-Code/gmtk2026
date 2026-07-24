@@ -1,4 +1,4 @@
-local Hitbox = require('game.hitbox')
+    local Hitbox = require('game.hitbox')
 local Timer = require('game.Timer')
 
 local ShopButton = require('libraries.knife.base'):extend()

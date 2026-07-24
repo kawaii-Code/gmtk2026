@@ -1,21 +1,49 @@
 local Rect = require('game.Rect')
 
-function load_images_from_directory(directory)
-    local images = {}
+function get_all_files_in_directory(directory)
+    local files = {}
+    get_all_files_in_directory_recursive(directory, files)
+    return files
+end
+
+function get_all_files_in_directory_recursive(directory, files)
     for _, item in ipairs(love.filesystem.getDirectoryItems(directory)) do
+        local file = directory .. "/" .. item
+        local info = love.filesystem.getInfo(file)
+        if info then
+            if info.type == "file" then
+                table.insert(files, file)
+            elseif info.type == "directory" then
+                get_all_files_in_directory_recursive(file, files)
+            end
+        end
+    end
+end
+
+function load_images_from_directory(directory)
+    local files = get_all_files_in_directory(directory)
+    local images = {}
+    for _, item in ipairs(files) do
         local ext = item:match("%.([%w]+)$")
-        local name = item:sub(1, #item - (#ext + 1))
-        images[name] = love.graphics.newImage(directory .. "/" .. item)
+        if ext and ext ~= "aseprite" then
+            local name = item:sub(16, #item - (#ext + 1))
+            name = name:gsub("/", "_")
+            images[name] = love.graphics.newImage(item)
+        end
     end
     return images
 end
 
+
 function load_sounds_from_directory(directory)
+    local files = get_all_files_in_directory(directory)
     local sounds = {}
-    for _, item in ipairs(love.filesystem.getDirectoryItems(directory)) do
+    for _, item in ipairs(files) do
         local ext = item:match("%.([%w]+)$")
-        local name = item:sub(1, #item - (#ext + 1))
-        sounds[name] = love.audio.newSource(directory .. "/" .. item, "static")
+        local name = item:sub(15, #item - (#ext + 1))
+        name = name:gsub("/", "_")
+        sounds[name] = love.audio.newSource(item, "static")
+        print(name)
     end
     return sounds
 end
