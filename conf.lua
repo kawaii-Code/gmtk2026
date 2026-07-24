@@ -22,6 +22,40 @@ config.actual_alarm_area_height = 600
 config.min_scroll = -300
 config.max_scroll = 200
 
+config.min_font_size = 8
+config.max_font_size = 72
+
+config.shop_button_hover_scale = 1.05
+
+config.shop = {
+    margin_top = 40,
+    margin_left = 20,
+    button_pad_y = 15,
+}
+
+config.alarms = {
+    basic_digital = {
+        shop_icon = "icon",
+        cost = 100,
+        earn = 20,
+        time = 10,
+    },
+    bruh_digital = {
+        shop_icon = "icon",
+        cost = 15,
+        earn = 22,
+        time = 15,
+    },
+    bo_digital = {
+        shop_icon = "icon",
+        cost = 6,
+        earn = 1,
+        time = 3,
+    },
+}
+
+config.shop_scroll_strength = 0.01 -- 5% за один скролл
+
 config.shelf = {
     x_pad = 5,
     height = 20,

@@ -36,4 +36,13 @@ function Rect:intersect_point(px, py)
            self:top()  <= py and py < self:bottom()
 end
 
+function Rect:draw(color, mode)
+    color = color or {0, 1, 0, 1}
+    mode = mode or 'line'
+    love.graphics.setColor(color)
+    love.graphics.rectangle(mode, self.x, self.y, self.w, self.h)
+    love.graphics.setColor({1, 1, 1, 1})
+end
+
 return Rect
+
