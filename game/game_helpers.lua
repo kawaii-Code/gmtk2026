@@ -55,7 +55,6 @@ function load_sounds_from_directory(directory)
         local name = item:sub(15, #item - (#ext + 1))
         name = name:gsub("/", "_")
         sounds[name] = love.audio.newSource(item, "static")
-        print(name)
     end
     return sounds
 end
@@ -113,7 +112,7 @@ function layout_alarm_screen()
     local x = 0.5 * (alarm_full_rect.w - scale * canvas:getWidth())
     local y = 0
     local w = canvas:getWidth()
-    local h = config.alarm.height + math.ceil(scale * (screen_height - canvas:getHeight()))
+    local h = config.alarm.height + math.ceil(screen_height / scale - config.alarm.height)
     if not game.alarm.scrollbar:is_hidden() then
         w = w - config.scrollbar_width
     end

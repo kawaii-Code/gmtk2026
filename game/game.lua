@@ -54,12 +54,13 @@ function game.load()
 
     local first = true
 
+    local desktop_width, desktop_height = love.window.getDesktopDimensions()
     -- Игровая зона
     game.alarm = {
         scrollbar = Scrollbar(),
         shelf_count = 20,
         content_height = 0,
-        canvas = love.graphics.newCanvas(config.alarm.width, love.graphics.getHeight()),
+        canvas = love.graphics.newCanvas(config.alarm.width, desktop_height),
     }
 
     game.shop = {
@@ -135,7 +136,7 @@ function game.update(dt)
     local shop_scrollbar_area = Rect(game.shop.rect.x + game.shop.rect.w, 0, config.scrollbar_width, screen_height)
     local alarm_area_scrollbar_area = Rect(game.alarm.full_rect.w - config.scrollbar_width, 0, config.scrollbar_width, screen_height)
     game.shop.scrollbar:update(shop_scrollbar_area, screen_height, game.shop.content_height)
-    game.alarm.scrollbar:update(alarm_area_scrollbar_area, game.alarm.canvas:getHeight(), game.alarm.content_height)
+    game.alarm.scrollbar:update(alarm_area_scrollbar_area, screen_height / game.alarm.scale, game.alarm.content_height)
 
     for _, button in ipairs(game.shop.buttons) do
         button:update(dt)
@@ -187,6 +188,7 @@ function game.draw()
             just_pressed = game.player.mouse_just_pressed,
             pressed = game.input.mouse.pressed,
         }
+        print(game.alarm.rect.h)
         game.minigame:draw(game.alarm.rect.h, mouse)
     end
     love.graphics.setCanvas()
@@ -195,7 +197,7 @@ function game.draw()
     local alarm_area_scrollbar_area = Rect(game.alarm.full_rect.w - config.scrollbar_width, 0, config.scrollbar_width, screen_height)
     game.alarm.scrollbar:draw(alarm_area_scrollbar_area)
 
-    love.graphics.draw(alarm_area_canvas, game.alarm.rect.x, game.alarm.rect.y, 0.0, scale)
+    love.graphics.draw(alarm_area_canvas, game.alarm.rect.x, game.alarm.rect.y, 0.0, game.alarm.scale)
 
     game.draw_shop_area()
 
