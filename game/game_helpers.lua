@@ -1,5 +1,5 @@
-local Rect = require('game.Rect')
-
+-----------------------------------------------------
+-- Загрузка ассетов
 function get_all_files_in_directory(directory)
     local files = {}
     get_all_files_in_directory_recursive(directory, files)
@@ -18,6 +18,18 @@ function get_all_files_in_directory_recursive(directory, files)
             end
         end
     end
+end
+
+function load_font_with_different_sizes(filepath)
+    fonts = {}
+    do
+        local i = config.min_font_size
+        while i <= config.max_font_size do
+            fonts[i] = love.graphics.newFont(filepath, i)
+            i = i + 2
+        end
+    end
+    return fonts
 end
 
 function load_images_from_directory(directory)
@@ -48,15 +60,11 @@ function load_sounds_from_directory(directory)
     return sounds
 end
 
-function register_timer(timer)
-    table.insert(game.timers, timer)
-    return timer
-end
 
-function square_lerp(from, to, t)
-    return from + (to - from) * (t*t)
-end
 
+
+-----------------------------------------------------
+-- Хелперы для отрисовки
 function draw_sprite(e)
     if e.animation then
         e.animations[e.animation]:draw(e.spritesheet, e.position.x + e.offset_x, e.position.y + e.offset_y)
@@ -72,7 +80,7 @@ function draw_text_inside_rect(text, rect, align)
 
     local font_height = math.floor(rect.h / 2) * 2
     font_height = math.clamp(font_height, config.min_font_size, config.max_font_size)
-    local large_enough_font = game.assets.fonts.shop_size[font_height]
+    local large_enough_font = game.assets.fonts.shop[font_height]
     if align == 'left' then
         love.graphics.print(text, large_enough_font, rect.x, rect.y)
     elseif align == 'center' then
@@ -84,60 +92,94 @@ function draw_text_inside_rect(text, rect, align)
     end
 end
 
-function calculate_alarm_area_parameters()
-    alarm_area = {}
-
-    local screen_width, screen_height = love.graphics.getDimensions()
-
-    local alarm_area_canvas = game.graphics.alarm_area_canvas
-
-    local shop_rect = get_shop_rect()
-    local shop_width = shop_rect.w
-    local alarm_area_width = screen_width - shop_width
-    local alarm_area_height = screen_height
-
-    alarm_area.scale = math.max(1.0, math.floor(alarm_area_width / config.actual_alarm_area_width))
-
-    alarm_area.canvas_x = -0.5 * (alarm_area.scale * (alarm_area_canvas:getWidth() - config.actual_alarm_area_width) - (alarm_area_width - alarm_area.scale * config.actual_alarm_area_width))
-    alarm_area.canvas_y = 0.0
-
-    alarm_area.x = (alarm_area_canvas:getWidth() - config.actual_alarm_area_width) / 2.0
-    alarm_area.y = 0
-    alarm_area.width = config.actual_area_width
-    alarm_area.height = screen_height
-
-    return alarm_area
-end
-
-function get_shop_rect()
-    local screen_width, screen_height = love.graphics.getDimensions()
-    local shop_width = math.ceil(screen_width * config.shop_horizontal_screen_percentage)
-    local result = Rect(screen_width - shop_width, 0, shop_width, screen_height)
-    if not game.obj.shop.scrollbar:is_hidden() then
-        result.w = result.w - config.scrollbar_width
-    end
-    return result
-end
-
 function draw_text_centered(text, x, y, font)
-    font = font or game.assets.fonts.shop
-
+    font = font or game.assets.fonts.shop[18]
     local text_width = font:getWidth(text)
     love.graphics.print(text, font, x - text_width * 0.5, y)
 end
 
-function translate_mouse_screen_to_canvas_coords(mouse_x, mouse_y)
-    alarm_area = calculate_alarm_area_parameters()
 
-    local x = mouse_x
-    local y = mouse_y
 
-    x = x - alarm_area.canvas_x
-    y = y - alarm_area.canvas_y
-    x = x / alarm_area.scale
-    y = y / alarm_area.scale
+-----------------------------------------------------
+-- UI
+function layout_alarm_screen()
+    local screen_width, screen_height = love.graphics.getDimensions()
+    local canvas = game.alarm.canvas
+
+    local alarm_full_rect = Rect(0, 0, game.shop.rect.x, screen_height)
+
+    local scale = math.max(1.0, math.floor(alarm_full_rect.w / canvas:getWidth()))
+
+    local x = 0.5 * (alarm_full_rect.w - scale * canvas:getWidth())
+    local y = 0
+    local w = canvas:getWidth()
+    local h = config.alarm.height + math.ceil(scale * (screen_height - canvas:getHeight()))
+    if not game.alarm.scrollbar:is_hidden() then
+        w = w - config.scrollbar_width
+    end
+
+    local shelf_y = config.alarm.margin_top
+    for i = 1, game.alarm.shelf_count do
+        shelf_y = shelf_y + config.alarm.shelf.height + config.alarm.shelf.spacing
+    end
+
+    game.alarm.content_height = shelf_y
+    game.alarm.rect = Rect(x, y, w, h)
+    game.alarm.scale = scale
+    game.alarm.full_rect = alarm_full_rect
+end
+
+function layout_shop_screen()
+    local screen_width, screen_height = love.graphics.getDimensions()
+    local shop_width = math.ceil(screen_width * config.shop_horizontal_screen_percentage)
+    local shop_rect = Rect(screen_width - shop_width, 0, shop_width, screen_height)
+    if not game.shop.scrollbar:is_hidden() then
+        shop_rect.w = shop_rect.w - config.scrollbar_width
+    end
+
+    local x = shop_rect.x + config.shop.margin_left
+    local y = shop_rect.y + config.shop.margin_top
+    for _, button in pairs(game.shop.buttons) do
+        button:layout(shop_rect.w, config.shop.margin_left)
+        button.position.x = x
+        button.position.y = y + game.shop.scrollbar:pixel_scroll()
+        y = y + button.hitbox.height + config.shop.button_spacing
+    end
+
+    game.shop.rect = shop_rect
+    game.shop.content_height = y
+end
+
+function alarm_position(alarm)
+    local x = config.alarm.shelf.margin_horizontal + alarm.x_position + alarm.x_offset
+    local y = config.alarm.margin_top + (alarm.shelf - 1) * (config.alarm.shelf.spacing + config.alarm.shelf.height)
+    local w, h = alarm.sprite:getDimensions()
+    y = y - h
+    y = y + game.alarm.scrollbar:pixel_scroll()
+    return x, y
+end
+
+function translate_mouse_to_alarm_screen()
+    local x = game.input.mouse.x
+    local y = game.input.mouse.y
+
+    x = x - game.alarm.rect.x
+    y = y - game.alarm.rect.y
+    x = x / game.alarm.scale
+    y = y / game.alarm.scale
 
     return x, y
+end
+
+-----------------------------------------------------
+-- Рандомные функции
+function register_timer(timer)
+    table.insert(game.timers, timer)
+    return timer
+end
+
+function square_lerp(from, to, t)
+    return from + (to - from) * (t*t)
 end
 
 function updateAnimation(e, deltaTime)

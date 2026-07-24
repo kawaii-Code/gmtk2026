@@ -3,39 +3,26 @@
 --
 -- Все что не получится найти здесь, ищи в game_helpers.lua
 --
-local anim8 = require('libraries.anim8')
-local lume = require('libraries.lume')
-local lurker = require('libraries.lurker')
-
-local Alarm = require('game.Alarm')
-local Rect = require('game.Rect')
-local Timer = require('game.Timer')
-local Stopwatch = require('game.Stopwatch')
-local ShopButton = require('game.ShopButton')
-local Scrollbar = require('game.Scrollbar')
-local Bank = require('game.Bank')
-
-
 game = {
     -- Все что является файлов в `assets/`
     -- попадает сюда по такому же пути.
     assets = {
         images = {},
         fonts = {},
+        sounds = {},
     },
 
-    graphics = {}, -- Душные графические канвасы
-    obj = {},      -- Игровые объекты
+    animations = {},
+
     input = {
         keys = {},
         just_pressed = {},
         mouse = {},
     },
-    timers = {},
-    debug = {},
-}
 
-require('game.game_helpers')
+    alarm = {},
+    shop = {},
+}
 
 
 function game.load()
@@ -43,97 +30,85 @@ function game.load()
         return anim8.newGrid(frame_width, frame_height, spritesheet:getPixelWidth(), spritesheet:getPixelHeight())
     end
 
-    game.assets.fonts.shop = love.graphics.newFont("assets/fonts/shop.otf", 18)
-    do
-        game.assets.fonts.shop_size = {}
-        local i = config.min_font_size
-        while i <= config.max_font_size do
-            game.assets.fonts.shop_size[i] = love.graphics.newFont("assets/fonts/shop.otf", i)
-            i = i + 2
-        end
-    end
-
+    game.assets.fonts.shop = load_font_with_different_sizes("assets/fonts/shop.otf")
     game.assets.sounds = load_sounds_from_directory("assets/sounds")
     game.assets.images = load_images_from_directory("assets/sprites")
     game.assets.images.grids = {
-        player = createGrid(64, 32, game.assets.images.player),
+        digital_clock = createGrid(150, 150, game.assets.images.release_normis),
+        aquarium = createGrid(150, 150, game.assets.images.release_aquarium),
     }
 
-    game.graphics.alarm_area_canvas = love.graphics.newCanvas(2 * config.actual_alarm_area_width, 2 * config.actual_alarm_area_height)
-
-    game.bank = Bank(config.starting_money)
-
-    local images = game.assets.images
     local grids = game.assets.images.grids
+    game.animations["digital_press_in"] = anim8.newAnimation(grids.digital_clock('2-5', 1), 0.1)
+    game.animations["digital_press_out"] = anim8.newAnimation(grids.digital_clock('6-8', 1), 0.1)
+    game.animations["digital_idle"] = anim8.newAnimation(grids.digital_clock(1, 1), 1)
+    game.animations["aquarium_press_in"] = anim8.newAnimation(grids.aquarium('2-5', 1), 0.05)
+    game.animations["aquarium_press_out"] = anim8.newAnimation(grids.aquarium('6-8', 1), 0.05)
+    game.animations["aquarium_idle"] = anim8.newAnimation(grids.aquarium(1, 1), 1)
 
-    game.obj.time = Stopwatch()
+    -- Игровые объекты
+    game.bank = Bank(config.starting_money)
+    game.playtime = Stopwatch()
 
     love.mouse.setVisible(false)
 
     local first = true
 
-    game.obj.alarm_area = {
+    -- Игровая зона
+    game.alarm = {
         scrollbar = Scrollbar(),
+        shelf_count = 20,
+        content_height = 0,
+        canvas = love.graphics.newCanvas(config.alarm.width, love.graphics.getHeight()),
     }
 
-    game.obj.shop = {
+    game.shop = {
         buttons = {},
         scrollbar = Scrollbar(),
+        content_height = 0,
     }
-
     for _, config in ipairs(config.alarms) do
-        table.insert(game.obj.shop.buttons, ShopButton(config))
+        for i = 1, 3 do
+            table.insert(game.shop.buttons, ShopButton(config))
+        end
     end
 
-    game.obj.alarms = {}
+    -- Будильники
+    game.alarms = {}
 
-    game.obj.shelf_count = 5
+    game.minigame = nil
 
-    game.obj.coin_count = 0
-
-    game.obj.shop_total_height = 0
-    game.obj.alarm_area_total_height = 0
-
-    game.current_minigame = nil
-    game.mouse_just_pressed = false
-    game.can_click = false
+    game.player = {
+        mouse_just_pressed = false,
+        can_click = false,
+    }
 end
 
 function game.update(dt)
-    game.mouse_just_pressed = game.input.mouse.just_pressed
     lurker.update()
-    game.can_click = false
-
-    local screen_width, screen_height = love.graphics.getDimensions()
-
-    local input = game.input
-    local obj = game.obj
-
-    local mouse_x, mouse_y = game.input.mouse.x, game.input.mouse.y
-
-    obj.time:update(dt)
-
-    if input.just_pressed["f11"] then
+    if game.input.just_pressed["f11"] then
         local fullscreen = love.window.getFullscreen()
         love.window.setFullscreen(not fullscreen, "desktop")
     end
 
-    for _, alarm in ipairs(game.obj.alarms) do
+    game.player.mouse_just_pressed = game.input.mouse.just_pressed
+    game.player.can_click = false
+
+    layout_shop_screen()
+    layout_alarm_screen()
+
+    for _, alarm in ipairs(game.alarms) do
         alarm:update(dt)
 
-        local mouse_x, mouse_y = translate_mouse_screen_to_canvas_coords(game.input.mouse.x, game.input.mouse.y)
-
-        local ox = (game.graphics.alarm_area_canvas:getWidth() - config.actual_alarm_area_width) / 2.0
-        local x = ox + config.shelf.x_pad + alarm.x_position + alarm.offset_x
-        local y = config.shelf.margin_top + config.shelf.pad + -1 * (game.obj.alarm_area_total_height - screen_height) * game.obj.alarm_area.scrollbar.scroll
-        y = y + (alarm.shelf - 1) * (config.shelf.height + config.shelf.pad)
-        y = y - game.assets.images.aquarium:getHeight()
+        local mouse_x, mouse_y = translate_mouse_to_alarm_screen()
+        local x, y = alarm_position(alarm)
 
         local alarm_rect = alarm.config.hitbox:to_rect(x, y)
         if alarm_rect:intersect_point(mouse_x, mouse_y) then
-            game.can_click = true
+            game.player.can_click = true
             if alarm.timer:done() and game.input.mouse.just_pressed then
-                game.current_minigame = alarm.config.Minigame(alarm)
+                game.minigame = alarm.config.Minigame(alarm)
+                alarm:on_press()
             end
         end
     end
@@ -141,43 +116,40 @@ function game.update(dt)
     --
     -- UI
     --
-    local shop_area_total_height = game.layout_shop_buttons_and_calculate_total_height()
-    local alarm_area_total_height = game.calculate_alarm_area_height()
+    local screen_width, screen_height = love.graphics.getDimensions()
+    local mouse_x, mouse_y = game.input.mouse.x, game.input.mouse.y
 
-    local shop_rect = get_shop_rect()
     local cursor_in_shop = false
-    if shop_rect:intersect_point(mouse_x, mouse_y) then
+    if mouse_x >= game.shop.rect.x then
         cursor_in_shop = true
     end
 
     if cursor_in_shop then
-        obj.shop.scrollbar.scroll = obj.shop.scrollbar.scroll - config.scroll_strength * input.mouse.scroll
-        obj.shop.scrollbar.scroll = math.clamp(obj.shop.scrollbar.scroll, 0, 1)
+        game.shop.scrollbar.scroll = game.shop.scrollbar.scroll - config.scroll_strength * game.input.mouse.scroll
+        game.shop.scrollbar.scroll = math.clamp(game.shop.scrollbar.scroll, 0, 1)
     else
-        obj.alarm_area.scrollbar.scroll = obj.alarm_area.scrollbar.scroll - config.scroll_strength * input.mouse.scroll
-        obj.alarm_area.scrollbar.scroll = math.clamp(obj.alarm_area.scrollbar.scroll, 0, 1)
+        game.alarm.scrollbar.scroll = game.alarm.scrollbar.scroll - config.scroll_strength * game.input.mouse.scroll
+        game.alarm.scrollbar.scroll = math.clamp(game.alarm.scrollbar.scroll, 0, 1)
     end
-    local screen_width, screen_height = love.graphics.getDimensions()
-    local shop_scrollbar_area = Rect(screen_width - config.scrollbar_width, 0, config.scrollbar_width, screen_height)
-    local alarm_area_scrollbar_area = Rect(shop_rect.x - config.scrollbar_width, 0, config.scrollbar_width, screen_height)
-    game.obj.shop.scrollbar:update(shop_scrollbar_area, screen_height, shop_area_total_height)
-    game.obj.alarm_area.scrollbar:update(alarm_area_scrollbar_area, screen_height, alarm_area_total_height)
 
-    for _, button in ipairs(obj.shop.buttons) do
+    local shop_scrollbar_area = Rect(game.shop.rect.x + game.shop.rect.w, 0, config.scrollbar_width, screen_height)
+    local alarm_area_scrollbar_area = Rect(game.alarm.full_rect.w - config.scrollbar_width, 0, config.scrollbar_width, screen_height)
+    game.shop.scrollbar:update(shop_scrollbar_area, screen_height, game.shop.content_height)
+    game.alarm.scrollbar:update(alarm_area_scrollbar_area, game.alarm.canvas:getHeight(), game.alarm.content_height)
+
+    for _, button in ipairs(game.shop.buttons) do
         button:update(dt)
 
         local button_rect = button.hitbox:to_rect(button.position.x, button.position.y)
-
         if button_rect:intersect_point(mouse_x, mouse_y) then
-            game.can_click = true
+            game.player.can_click = true
             button.hovered = true
             if game.input.mouse.just_pressed then
                 if game.bank:can_buy(button.alarm) then
                     game.bank:buy(button.alarm)
                     button.bought = true
-                    local shelf = math.random(1, 5)
-                    local alarm = Alarm(button.alarm, shelf)
-                    table.insert(game.obj.alarms, alarm)
+                    local alarm = Alarm(button.alarm)
+                    table.insert(game.alarms, alarm)
                 end
             end
         else
@@ -185,99 +157,83 @@ function game.update(dt)
         end
     end
 
-    if game.current_minigame then
-        if game.current_minigame:update(dt) then
-            game.bank:earn(game.current_minigame.alarm.config.earn)
-            game.current_minigame:on_done()
-            game.current_minigame = nil
+    if game.minigame then
+        if game.minigame:update(dt) then
+            game.bank:earn(game.minigame.alarm.config.earn)
+            game.minigame:on_done()
+            game.minigame.alarm:on_minigame_done()
+            game.minigame = nil
         end
     end
 end
 
 function game.draw()
-    local obj = game.obj
-
     local screen_width, screen_height = love.graphics.getDimensions()
 
-    local alarm_area_canvas = game.graphics.alarm_area_canvas
+    local alarm_area_canvas = game.alarm.canvas
 
-    local shop_rect = get_shop_rect()
-    local shop_width = shop_rect.w
-    local alarm_area_width = shop_rect.x
-    local alarm_area_height = screen_height
+    love.graphics.clear({0.2, 0.2, 0.2, 1})
+    love.graphics.setColor({0.3, 0.3, 0.3, 1})
+    love.graphics.rectangle('fill', game.alarm.full_rect.x, game.alarm.full_rect.y, game.alarm.full_rect.w, game.alarm.full_rect.h)
+    love.graphics.setColor({1, 1, 1, 1})
 
-    local scale = math.max(1.0, math.floor(alarm_area_width / config.actual_alarm_area_width))
-
-    local canvas_x = -0.5 * (scale * (alarm_area_canvas:getWidth() - config.actual_alarm_area_width) - (alarm_area_width - scale * config.actual_alarm_area_width))
-    local canvas_y = 0.0
-
-    local offset_x = (alarm_area_canvas:getWidth() - config.actual_alarm_area_width) / 2.0
-    local offset_y = 0
-
-    local canvas_width = alarm_area_canvas:getWidth()
-    local canvas_height = alarm_area_canvas:getHeight()
     love.graphics.setCanvas(alarm_area_canvas)
-    game.draw_alarm_area(game, offset_x, offset_y, config.actual_alarm_area_width, screen_height)
-    if game.current_minigame then
-        love.graphics.push()
-        love.graphics.translate(offset_x, offset_y)
-
-        local mouse_x, mouse_y = translate_mouse_screen_to_canvas_coords(game.input.mouse.x, game.input.mouse.y)
-        print(mouse_x)
+    game.draw_alarm_area()
+    if game.minigame then
+        local mouse_x, mouse_y = translate_mouse_to_alarm_screen()
         local mouse = {
-            x = mouse_x - offset_x,
-            y = mouse_y - offset_y,
-            just_pressed = game.mouse_just_pressed,
+            x = mouse_x,
+            y = mouse_y,
+            just_pressed = game.player.mouse_just_pressed,
             pressed = game.input.mouse.pressed,
         }
-        game.current_minigame:draw(screen_height, mouse)
-        love.graphics.pop()
+        game.minigame:draw(game.alarm.rect.h, mouse)
     end
     love.graphics.setCanvas()
 
-    love.graphics.draw(alarm_area_canvas, canvas_x, canvas_y, 0.0, scale)
+    local screen_width, screen_height = love.graphics.getDimensions()
+    local alarm_area_scrollbar_area = Rect(game.alarm.full_rect.w - config.scrollbar_width, 0, config.scrollbar_width, screen_height)
+    game.alarm.scrollbar:draw(alarm_area_scrollbar_area)
 
-    game.draw_shop_area(game, shop_rect.x, 0, shop_width, screen_height)
+    love.graphics.draw(alarm_area_canvas, game.alarm.rect.x, game.alarm.rect.y, 0.0, scale)
+
+    game.draw_shop_area()
 
     local cursor_sprite = game.assets.images["release_cursor-vector"]
-    if game.can_click then
+    local cursor_offset = -6
+    if game.player.can_click then
+        cursor_offset = -20
         cursor_sprite = game.assets.images["release_finger-vector"]
     end
     local cursor_scale = config.cursor_size / cursor_sprite:getWidth()
-    love.graphics.draw(cursor_sprite, game.input.mouse.x - 6, game.input.mouse.y, 0, cursor_scale)
+    love.graphics.draw(cursor_sprite, game.input.mouse.x + cursor_offset, game.input.mouse.y, 0, cursor_scale)
 
-    love.graphics.print(game.bank.money .. "$", game.assets.fonts.shop, 0, 0)
+    love.graphics.print(game.bank.money .. "$", game.assets.fonts.shop[18], 0, 0)
 end
 
-function game.draw_alarm_area(game, ox, oy, w, h)
-    love.graphics.clear({0.2, 0.2, 0.2, 1})
-    love.graphics.setColor({0.3, 0.3, 0.3, 1})
-    love.graphics.rectangle('fill', ox, oy, config.actual_alarm_area_width, config.actual_alarm_area_height)
-    love.graphics.setColor({1, 1, 1, 1})
+function game.draw_alarm_area()
+    love.graphics.clear({0.3, 0.3, 0.3, 1})
 
-    local mouse_x, mouse_y = translate_mouse_screen_to_canvas_coords(game.input.mouse.x, game.input.mouse.y)
+    -- В прямоугольнике X это где нужно нарисовать канвас по x
+    -- w и h это в 400x600+-(по высоте окна) координатах
+    local rect = game.alarm.rect
+
+    local mouse_x, mouse_y = translate_mouse_to_alarm_screen()
 
     local x = 0
-    local y = config.shelf.margin_top + config.shelf.pad + -1 * (game.obj.alarm_area_total_height - h) * game.obj.alarm_area.scrollbar.scroll
-    for _ = 1, game.obj.shelf_count do
+    local y = config.alarm.margin_top + game.alarm.scrollbar:pixel_scroll()
+    for _ = 1, game.alarm.shelf_count do
         love.graphics.setColor({0.8, 0.7, 0.7, 1})
-        love.graphics.rectangle('fill', ox + config.shelf.x_pad + x, y, w - 2 * config.shelf.x_pad, config.shelf.height)
+        love.graphics.rectangle('fill', config.alarm.shelf.margin_horizontal, y, rect.w - 2 * config.alarm.shelf.margin_horizontal, config.alarm.shelf.height)
         love.graphics.setColor({1, 1, 1, 1})
-        y = y + config.shelf.height + config.shelf.pad
+        y = y + config.alarm.shelf.height + config.alarm.shelf.spacing
     end
 
     local over = false
-    for _, alarm in ipairs(game.obj.alarms) do
-        local ox = (game.graphics.alarm_area_canvas:getWidth() - config.actual_alarm_area_width) / 2.0
-        local x = ox + config.shelf.x_pad + alarm.x_position + alarm.offset_x
-        local y = config.shelf.margin_top + config.shelf.pad + -1 * (game.obj.alarm_area_total_height - h) * game.obj.alarm_area.scrollbar.scroll
-        y = y + (alarm.shelf - 1) * (config.shelf.height + config.shelf.pad)
-        y = y - game.assets.images.aquarium:getHeight()
-
+    for _, alarm in ipairs(game.alarms) do
+        local x, y = alarm_position(alarm)
+        alarm.sprite:draw(alarm.spritesheet, x, y)
         local rect = alarm.config.hitbox:to_rect(x, y)
-
-        love.graphics.draw(game.assets.images.aquarium, rect.x, rect.y)
-
         love.graphics.rectangle('line', rect.x, rect.y, rect.w, rect.h)
         if rect:intersect_point(mouse_x, mouse_y) then
             over = true
@@ -291,22 +247,18 @@ function game.draw_alarm_area(game, ox, oy, w, h)
     end
     love.graphics.rectangle('fill', mouse_x, mouse_y, 10, 10)
     love.graphics.setColor({1, 1, 1, 1})
-
-    local screen_width, screen_height = love.graphics.getDimensions()
-    local alarm_area_scrollbar_area = Rect(screen_width - 224 - config.scrollbar_width, 0, config.scrollbar_width, screen_height)
-    game.obj.alarm_area.scrollbar:draw(alarm_area_scrollbar_area)
 end
 
-function game.draw_shop_area(game, ox, oy, w, h)
+function game.draw_shop_area()
+    local rect = game.shop.rect
     love.graphics.setColor({1.0, 0.0, 0.32, 1})
-    love.graphics.rectangle('fill', ox, oy, w, h)
+    love.graphics.rectangle('fill', rect.x, rect.y, rect.w, rect.h)
     love.graphics.setColor({1, 1, 1, 1})
 
-    draw_text_centered("SHOP", ox + w / 2, 0)
+    draw_text_centered("SHOP", rect.x + rect.w / 2, 0)
 
-    for _, button in ipairs(game.obj.shop.buttons) do
-        local scale, offset_x = button:layout(w, config.shop.margin_left)
-        local rect = button.hitbox:to_rect(button.position.x, button.position.y)
+    for _, button in ipairs(game.shop.buttons) do
+        local scale, offset_x = button:layout(rect.w, config.shop.margin_left)
         local x = button.position.x + offset_x
         local y = button.position.y
 
@@ -349,35 +301,7 @@ function game.draw_shop_area(game, ox, oy, w, h)
 
     local screen_width, screen_height = love.graphics.getDimensions()
     local shop_scrollbar_area = Rect(screen_width - config.scrollbar_width, 0, config.scrollbar_width, screen_height)
-    game.obj.shop.scrollbar:draw(shop_scrollbar_area)
+    game.shop.scrollbar:draw(shop_scrollbar_area)
 end
-
-function game.calculate_alarm_area_height()
-    local y = config.shelf.pad
-
-    for i = 1, game.obj.shelf_count do
-        y = y + config.shelf.height + config.shelf.pad
-    end
-    game.obj.alarm_area_total_height = y
-    return y
-end
-
-function game.layout_shop_buttons_and_calculate_total_height()
-    local shop_rect = get_shop_rect()
-
-    local x = shop_rect.x + config.shop.margin_left
-    local y = shop_rect.y + config.shop.margin_top
-    for _, button in pairs(game.obj.shop.buttons) do
-        button:layout(shop_rect.w, config.shop.margin_left)
-        button.position.x = x
-        local scroll_amount = -1 * (game.obj.shop_total_height - shop_rect.h) * game.obj.shop.scrollbar.scroll
-        button.position.y = y + scroll_amount
-        y = y + button.hitbox.height + config.shop.button_pad_y
-    end
-
-    game.obj.shop_total_height = y
-    return y
-end
-
 
 return game

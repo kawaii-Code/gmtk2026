@@ -1,6 +1,4 @@
-local game = require('game.game')
-
-require('game.math')
+lurker = require('libraries.lurker')
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")

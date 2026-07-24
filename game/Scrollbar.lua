@@ -1,6 +1,3 @@
-local Hitbox = require('game.Hitbox')
-local Rect = require('game.Rect')
-
 local Scrollbar = require('libraries.knife.base'):extend()
 
 function Scrollbar:constructor()
@@ -28,7 +25,14 @@ function Scrollbar:rect(scrollbar_area)
     )
 end
 
+function Scrollbar:pixel_scroll()
+    return -1 * (self.content_height - self.visible_height) * self.scroll
+end
+
 function Scrollbar:update(scrollbar_area, visible_height, content_height)
+    self.visible_height = visible_height
+    self.content_height = content_height
+
     self.size = visible_height / content_height
     if self:is_hidden() then
         self.scroll = 0

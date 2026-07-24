@@ -1,5 +1,19 @@
-local SimpleClickMinigame = require('game.SimpleClickMinigame')
-local Hitbox = require('game.Hitbox')
+anim8 = require('libraries.anim8')
+lume = require('libraries.lume')
+
+Alarm = require('game.Alarm')
+Rect = require('game.Rect')
+Timer = require('game.Timer')
+Hitbox = require('game.Hitbox')
+Stopwatch = require('game.Stopwatch')
+ShopButton = require('game.ShopButton')
+Scrollbar = require('game.Scrollbar')
+SimpleClickMinigame = require('game.SimpleClickMinigame')
+Bank = require('game.Bank')
+
+require('game.game')
+require('game.game_helpers')
+require('game.math')
 
 config = {}
 
@@ -17,6 +31,19 @@ config.player = {}
 config.player.speed = 10
 config.player.run_speed = 25
 
+-- Не будильники, а игровая область.
+-- Ибо лень писать alarm_area везде.
+config.alarm = {
+    width = 400,
+    height = 600,
+    margin_top = 100,
+    shelf = {
+        margin_horizontal = 5,
+        height = 20,
+        spacing = 50,
+    },
+}
+
 config.actual_alarm_area_width = 400
 config.actual_alarm_area_height = 600
 
@@ -29,7 +56,7 @@ config.scroll_strength = 0.01 -- 1% за один микро-прокрутку 
 config.shop = {
     margin_top = 40,
     margin_left = 20,
-    button_pad_y = 15,
+    button_spacing = 15,
 }
 
 config.starting_money = 10
@@ -46,7 +73,9 @@ config.alarms = {
         earn = 5,
         time = 3,
         shelf = 1,
-        hitbox = Hitbox(0, 0, 130, 130),
+        hitbox = Hitbox(0, 80, 100, 70),
+        sprite_name = "release_normis", -- Очень плохое название!! (Оно берется от пути к файлу)
+        sprite_name_mini = "digital",
         Minigame = SimpleClickMinigame,
     },
     {
@@ -57,7 +86,9 @@ config.alarms = {
         time = 3,
         shelf = 1,
         x_position = 150,
-        hitbox = Hitbox(0, 0, 130, 130),
+        hitbox = Hitbox(0, 20, 130, 130),
+        sprite_name = "release_aquarium",
+        sprite_name_mini = "aquarium",
         Minigame = SimpleClickMinigame,
     },
     {
@@ -67,18 +98,13 @@ config.alarms = {
         earn = 10,
         time = 10,
         shelf = 2,
-        hitbox = Hitbox(0, 0, 130, 130),
+        hitbox = Hitbox(0, 20, 130, 130),
+        sprite_name = "release_aquarium",
+        sprite_name_mini = "aquarium",
         Minigame = SimpleClickMinigame,
     },
 }
 
-
-config.shelf = {
-    margin_top = 100,
-    x_pad = 5,
-    height = 20,
-    pad = 50,
-}
 
 config.shop_horizontal_screen_percentage = 0.3  -- 30% по горизонтали занимает магазин
 

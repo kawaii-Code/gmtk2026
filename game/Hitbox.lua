@@ -1,5 +1,3 @@
-local Rect = require('game.Rect')
-
 local Hitbox = require('libraries.knife.base'):extend()
 
 function Hitbox:constructor(offset_x, offset_y, width, height)

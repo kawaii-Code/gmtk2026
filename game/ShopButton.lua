@@ -1,14 +1,9 @@
-    local Hitbox = require('game.Hitbox')
-local Timer = require('game.Timer')
-
 local ShopButton = require('libraries.knife.base'):extend()
-
-BUTTON_SPRITE_OFFSET_X = 0
 
 function ShopButton:constructor(alarm_config)
     self.position = { x = 0, y = 0 }
     self.alarm = alarm_config
-    self.hitbox = Hitbox(BUTTON_SPRITE_OFFSET_X, 2, 600, 200)
+    self.hitbox = Hitbox(0, 2, 600, 200)
 
     self.bought = false
 
@@ -56,7 +51,7 @@ function ShopButton:layout(width, mx)
     self.hitbox.width = self.hitbox.width * self.scale
     self.hitbox.height = self.hitbox.height * self.scale
 
-    self.hitbox.offset_x = BUTTON_SPRITE_OFFSET_X + offset_x
+    self.hitbox.offset_x = offset_x
 
     return self.scale * scale, offset_x
 end
