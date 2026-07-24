@@ -1,4 +1,5 @@
-local Vector = require('libraries.brinevector')
+local SimpleClickMinigame = require('game.SimpleClickMinigame')
+local Hitbox = require('game.Hitbox')
 
 config = {}
 
@@ -19,13 +20,11 @@ config.player.run_speed = 25
 config.actual_alarm_area_width = 400
 config.actual_alarm_area_height = 600
 
-config.min_scroll = -300
-config.max_scroll = 200
-
 config.min_font_size = 8
 config.max_font_size = 72
 
 config.shop_button_hover_scale = 1.05
+config.scroll_strength = 0.01 -- 1% за один микро-прокрутку колеса
 
 config.shop = {
     margin_top = 40,
@@ -33,28 +32,40 @@ config.shop = {
     button_pad_y = 15,
 }
 
+config.starting_money = 10
+
+config.scrollbar_width = 25
+
 config.alarms = {
-    basic_digital = {
+    {
+        name = "basic",
         shop_icon = "icon",
-        cost = 100,
-        earn = 20,
-        time = 10,
-    },
-    bruh_digital = {
-        shop_icon = "icon",
-        cost = 15,
-        earn = 22,
-        time = 15,
-    },
-    bo_digital = {
-        shop_icon = "icon",
-        cost = 6,
-        earn = 1,
+        cost = 10,
+        earn = 5,
         time = 3,
+        hitbox = Hitbox(0, 0, 130, 130),
+        Minigame = SimpleClickMinigame,
+    },
+    {
+        name = "digital",
+        shop_icon = "icon",
+        cost = 10,
+        earn = 5,
+        time = 3,
+        hitbox = Hitbox(0, 0, 130, 130),
+        Minigame = SimpleClickMinigame,
+    },
+    {
+        name = "crab",
+        shop_icon = "icon",
+        cost = 30,
+        earn = 10,
+        time = 10,
+        hitbox = Hitbox(0, 0, 130, 130),
+        Minigame = SimpleClickMinigame,
     },
 }
 
-config.shop_scroll_strength = 0.01 -- 5% за один скролл
 
 config.shelf = {
     x_pad = 5,
@@ -65,15 +76,6 @@ config.shelf = {
 config.shop_horizontal_screen_percentage = 0.3  -- 30% по горизонтали занимает магазин
 
 config.mouse_scroll_strength = 10
-
-config.move_line = {
-    Vector(102.3033, 26.1967),
-    Vector(76.1305, 31.2665),
-    Vector(52.5272, 38.0698),
-    Vector(19.4632, 44.1338),
-    Vector(-8.6765, 47.9735),
-    Vector(-66.8765, 47.9735),
-}
 
 function love.conf(t)
     t.identity = nil                    -- The name of the save directory (string)

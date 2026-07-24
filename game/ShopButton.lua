@@ -10,6 +10,8 @@ function ShopButton:constructor(alarm_config)
     self.alarm = alarm_config
     self.hitbox = Hitbox(BUTTON_SPRITE_OFFSET_X, 2, 600, 200)
 
+    self.bought = false
+
     self.scale = 1
     self.hovered = false
     self.hover_scale_timer = Timer(0.07)
@@ -20,6 +22,7 @@ function ShopButton:update(dt)
         if self.hover_scale_timer:done() then
             if self.scale < config.shop_button_hover_scale then
                 self.hover_scale_timer:reset()
+                game.assets.sounds["click"]:play()
             end
         else
             self.hover_scale_timer:update(dt)

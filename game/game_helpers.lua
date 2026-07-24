@@ -10,6 +10,16 @@ function load_images_from_directory(directory)
     return images
 end
 
+function load_sounds_from_directory(directory)
+    local sounds = {}
+    for _, item in ipairs(love.filesystem.getDirectoryItems(directory)) do
+        local ext = item:match("%.([%w]+)$")
+        local name = item:sub(1, #item - (#ext + 1))
+        sounds[name] = love.audio.newSource(directory .. "/" .. item, "static")
+    end
+    return sounds
+end
+
 function register_timer(timer)
     table.insert(game.timers, timer)
     return timer
@@ -75,7 +85,9 @@ function get_shop_rect()
     local screen_width, screen_height = love.graphics.getDimensions()
     local shop_width = math.ceil(screen_width * config.shop_horizontal_screen_percentage)
     local result = Rect(screen_width - shop_width, 0, shop_width, screen_height)
-    result.w = result.w - 30
+    if not game.obj.shop.scrollbar:is_hidden() then
+        result.w = result.w - config.scrollbar_width
+    end
     return result
 end
 

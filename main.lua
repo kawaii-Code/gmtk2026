@@ -50,5 +50,10 @@ function love.mousepressed(x, y, button, istouch, presses)
     game.input.mouse.x = x
     game.input.mouse.y = y
     game.input.mouse.button = button
+    game.input.mouse.pressed = true
     game.input.mouse.just_pressed = true
+end
+
+function love.mousereleased(x, y, button, istouch, presses)
+    game.input.mouse.pressed = false
 end
