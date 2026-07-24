@@ -2,6 +2,7 @@ anim8 = require('libraries.anim8')
 lume = require('libraries.lume')
 
 Alarm = require('game.Alarm')
+AlarmDisplay = require('game.AlarmDisplay')
 Rect = require('game.Rect')
 Timer = require('game.Timer')
 Hitbox = require('game.Hitbox')
@@ -40,7 +41,7 @@ config.alarm = {
     shelf = {
         margin_horizontal = 5,
         height = 20,
-        spacing = 50,
+        spacing = 120,
     },
 }
 
@@ -67,15 +68,18 @@ config.scrollbar_width = 25
 
 config.alarms = {
     {
-        name = "basic",
+        name = "basic_clock",
         shop_icon = "icon",
         cost = 10,
         earn = 5,
         time = 3,
         shelf = 1,
-        hitbox = Hitbox(0, 80, 100, 70),
-        sprite_name = "release_normis", -- Очень плохое название!! (Оно берется от пути к файлу)
-        sprite_name_mini = "digital",
+        x_position = 150,
+        hitbox = Hitbox(0, 70, 75, 80),
+        display_animation = "clock_clock",
+        animation_full_path = "release_clock_clock",
+        sprite_name = "release_clock",
+        sprite_name_mini = "basic_clock",
         Minigame = SimpleClickMinigame,
     },
     {
@@ -85,10 +89,11 @@ config.alarms = {
         earn = 5,
         time = 3,
         shelf = 1,
-        x_position = 150,
-        hitbox = Hitbox(0, 20, 130, 130),
-        sprite_name = "release_aquarium",
-        sprite_name_mini = "aquarium",
+        hitbox = Hitbox(0, 80, 100, 70),
+        display_animation = "countdown",
+        animation_full_path = "release_countdown",
+        sprite_name = "release_normis", -- Очень плохое название!! (Оно берется от имени файла)
+        sprite_name_mini = "digital",
         Minigame = SimpleClickMinigame,
     },
     {
@@ -99,6 +104,9 @@ config.alarms = {
         time = 10,
         shelf = 2,
         hitbox = Hitbox(0, 20, 130, 130),
+        animation_full_path = "release_clock_clock",
+        display_animation = "aquarium_clock",
+        animation_full_path = "release_aquarium-clock",
         sprite_name = "release_aquarium",
         sprite_name_mini = "aquarium",
         Minigame = SimpleClickMinigame,
