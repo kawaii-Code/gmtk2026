@@ -32,12 +32,16 @@ function game.load()
 
     game.assets.fonts.shop = load_font_with_different_sizes("assets/fonts/shop.ttf")
     game.assets.fonts.shop_bold = load_font_with_different_sizes("assets/fonts/shop_bold.ttf")
+    game.assets.music = love.audio.newSource("assets/music/music.wav", 'static')
+    game.assets.music_loop = love.audio.newSource("assets/music/music.wav", 'static')
     game.assets.sounds = load_sounds_from_directory("assets/sounds")
     game.assets.images = load_images_from_directory("assets/sprites")
     game.assets.images.grids = {
         basic_clock = createGrid(150, 150, game.assets.images.release_clock),
-        digital_clock = createGrid(150, 150, game.assets.images.release_normis),
+        digital = createGrid(150, 150, game.assets.images.release_normis),
         aquarium = createGrid(150, 150, game.assets.images.release_aquarium),
+        crab = createGrid(150, 150, game.assets.images.release_crab),
+
         countdown = createGrid(33, 27, game.assets.images.release_countdown),
         aquarium_clock = createGrid(13, 13, game.assets.images["release_aquarium-clock"]),
         fishing_minigame_window = createGrid(374, 185, game.assets.images.release_box_fishing_minigame),
@@ -47,29 +51,20 @@ function game.load()
         clock_clock = createGrid(43, 43, game.assets.images.release_clock_clock),
     }
 
-
     local grids = game.assets.images.grids
-    game.simple_sprites = {}
-    game.simple_sprites["basic_clock"] = anim8.newAnimation(grids.basic_clock(1, 1), 1)
-    game.simple_sprites["digital"] = anim8.newAnimation(grids.digital_clock(1, 1), 1)
-    game.simple_sprites["aquarium"] = anim8.newAnimation(grids.aquarium(1, 1), 1)
-
-    game.animations["digital_press_in"] = anim8.newAnimation(grids.digital_clock('2-5', 1), 0.1)
-    game.animations["digital_press_out"] = anim8.newAnimation(grids.digital_clock('6-8', 1), 0.1)
-    game.animations["digital_idle"] = anim8.newAnimation(grids.digital_clock(1, 1), 1)
-
-    game.animations["basic_clock_press_in"] = anim8.newAnimation(grids.basic_clock('2-5', 1), 0.1)
-    game.animations["basic_clock_press_out"] = anim8.newAnimation(grids.basic_clock('6-8', 1), 0.1)
-    game.animations["basic_clock_idle"] = anim8.newAnimation(grids.basic_clock(1, 1), 1)
-
-    game.animations["aquarium_press_in"] = anim8.newAnimation(grids.aquarium('2-5', 1), 0.05)
-    game.animations["aquarium_press_out"] = anim8.newAnimation(grids.aquarium('6-8', 1), 0.05)
-    game.animations["aquarium_idle"] = anim8.newAnimation(grids.aquarium(1, 1), 1)
 
     -- на подумать: ускорить секунды
-    game.animations["countdown"] = anim8.newAnimation(grids.countdown('1-100', 1), 1)
-    game.animations["aquarium_clock"] = anim8.newAnimation(grids.aquarium_clock('1-20', 1), 1)
-    game.animations["clock_clock"] = anim8.newAnimation(grids.clock_clock('1-60', 1), 1)
+    game.animations["release_countdown"] = anim8.newAnimation(grids.countdown('1-100', 1), 1)
+    game.animations["release_aquarium-clock"] = anim8.newAnimation(grids.aquarium_clock('1-20', 1), 1)
+    game.animations["release_clock_clock"] = anim8.newAnimation(grids.clock_clock('1-60', 1), 1)
+    game.animations["release_countdown_crab"] = anim8.newAnimation(grids.countdown('1-100', 1), 1)
+
+    for _, config in ipairs(config.alarms) do
+        local name = config.sprite_name_mini
+        game.animations[name .. "_press_in"] = anim8.newAnimation(grids[name]('2-5', 1), 0.1)
+        game.animations[name .. "_press_out"] = anim8.newAnimation(grids[name]('6-8', 1), 0.1)
+        game.animations[name .. "_idle"] = anim8.newAnimation(grids[name](1, 1), 1)
+    end
 
     -- волны в аквариуме 🫠
     game.animations["fishing_minigame_window_idle"] = anim8.newAnimation(grids.fishing_minigame_window('1-2', 1), 0.8)
@@ -113,14 +108,25 @@ function game.load()
 
     game.minigame = nil
 
+    game.money_effects = {}
+
     game.player = {
         mouse_just_pressed = false,
         can_click = false,
     }
+
+    love.audio.setVolume(0.1)
+    game.assets.music:play()
+    game.assets.music_loop:setLooping(true)
 end
 
 function game.update(dt)
     lurker.update()
+
+    if not game.assets.music:isPlaying() and not game.assets.music_loop:isPlaying() then
+        game.assets.music_loop:play()
+    end
+
     if game.input.just_pressed["f11"] then
         local fullscreen = love.window.getFullscreen()
         love.window.setFullscreen(not fullscreen, "desktop")
@@ -141,11 +147,27 @@ function game.update(dt)
         local alarm_rect = alarm.config.hitbox:to_rect(x, y)
         if not game.minigame and alarm_rect:intersect_point(mouse_x, mouse_y) then
             game.player.can_click = true
-            if alarm.timer:done() and game.input.mouse.just_pressed then
-                game.minigame = alarm.config.Minigame(alarm)
-                alarm:on_press()
+            if is_time_maxed_out(alarm.config) then
+                game.player.can_click = false
+            end
+            if game.input.mouse.just_pressed then
+                if not is_time_maxed_out(alarm.config) then
+                    if alarm.timer:done() then
+                        game.minigame = alarm.config.Minigame(alarm)
+                        alarm:on_press()
+                    else
+                        game.assets.sounds.error:play()
+                        game.player.can_click = false
+                    end
+                else
+                    game.assets.sounds.error:play()
+                end
             end
         end
+    end
+
+    for _, m in ipairs(game.money_effects) do
+        m:update(dt)
     end
 
     --
@@ -188,10 +210,10 @@ function game.update(dt)
                 end
             elseif button.rac:intersect_point(mouse_x, mouse_y) then
                 game.player.can_click = true
-                if game.input.mouse.just_pressed then
+                if game.input.mouse.just_pressed and not is_time_maxed_out(button.alarm) then
                     local upgrade = button.alarm.upgrades["time"][game.alarm_stats[button.alarm.name].time_upgrade_level]
                     local upgrade_cost = upgrade.cost
-                    if not is_time_maxed_out(button.alarm) and game.bank:has(upgrade_cost) then
+                    if game.bank:has(upgrade_cost) then
                         game.bank:spend(upgrade_cost)
                         game.alarm_stats[button.alarm.name].time = game.alarm_stats[button.alarm.name].time - upgrade.bonus
                         game.alarm_stats[button.alarm.name].time_upgrade_level = game.alarm_stats[button.alarm.name].time_upgrade_level + 1
@@ -199,10 +221,10 @@ function game.update(dt)
                 end
             elseif button.rlc:intersect_point(mouse_x, mouse_y) then
                 game.player.can_click = true
-                if game.input.mouse.just_pressed then
+                if game.input.mouse.just_pressed and not is_earn_maxed_out(button.alarm) then
                     local upgrade = button.alarm.upgrades["earn"][game.alarm_stats[button.alarm.name].earn_upgrade_level]
                     local upgrade_cost = upgrade.cost
-                    if not is_earn_maxed_out(button.alarm) and game.bank:has(upgrade_cost) then
+                    if game.bank:has(upgrade_cost) then
                         game.bank:spend(upgrade_cost)
                         game.alarm_stats[button.alarm.name].earn = game.alarm_stats[button.alarm.name].earn + upgrade.bonus
                         game.alarm_stats[button.alarm.name].earn_upgrade_level = game.alarm_stats[button.alarm.name].earn_upgrade_level + 1
@@ -240,9 +262,16 @@ function game.update(dt)
         end
     end
 
+    if game.input.mouse.just_pressed then
+        game.assets.sounds.click:play()
+    end
+
     if game.minigame then
         if game.minigame:update(dt) then
-            game.bank:earn(game.alarm_stats[game.minigame.alarm.config.name].earn)
+            local earn = game.alarm_stats[game.minigame.alarm.config.name].earn
+            game.bank:earn(earn)
+            local money_effect = MoneyEffect(game.input.mouse.x, game.input.mouse.y, earn)
+            table.insert(game.money_effects, money_effect)
             game.minigame.alarm.timer:reset_with_new_duration(game.alarm_stats[game.minigame.alarm.config.name].time)
             game.minigame.alarm:on_minigame_done()
             game.minigame = nil
@@ -255,9 +284,10 @@ function game.draw()
 
     local alarm_area_canvas = game.alarm.canvas
 
-    love.graphics.clear({0.0, 0.0, 0.0, 1})
+    love.graphics.clear(config.bg_color)
 
     love.graphics.setCanvas(alarm_area_canvas)
+    love.graphics.clear(config.bg_color)
     game.draw_alarm_area()
     if game.minigame then
         local mouse_x, mouse_y = translate_mouse_to_alarm_screen()
@@ -279,16 +309,26 @@ function game.draw()
 
     game.draw_shop_area()
 
+    local money_area_width = game.shop.rect.w * 0.25
+    local money_area_rect = Rect(0, 0, money_area_width, money_area_width)
+    draw_sprite_inside_rect(game.assets.images.UI_icon, money_area_rect)
+    local tr = money_area_rect:clone()
+    tr.x = tr.x + tr.w * 0.07
+    tr.w = tr.w * 0.86
+    draw_text_inside_rect(game.bank.money .. "$", tr, 'center')
+
+    for _, m in ipairs(game.money_effects) do
+        m:draw()
+    end
+
     local cursor_sprite = game.assets.images["release_cursor-vector"]
     local cursor_offset = -6
     if game.player.can_click then
         cursor_offset = -20
         cursor_sprite = game.assets.images["release_finger-vector"]
     end
-    local cursor_scale = config.cursor_size / cursor_sprite:getWidth()
+    local cursor_scale = (game.shop.rect.w * config.cursor_size) / cursor_sprite:getWidth()
     love.graphics.draw(cursor_sprite, game.input.mouse.x + cursor_offset, game.input.mouse.y, 0, cursor_scale)
-
-    love.graphics.print(game.bank.money .. "$", game.assets.fonts.shop[18], 0, 0)
 end
 
 function game.draw_alarm_area()
@@ -306,37 +346,34 @@ function game.draw_alarm_area()
         y = y + config.alarm.shelf.height + config.alarm.shelf.spacing
     end
 
-    local over = false
     for _, alarm in ipairs(game.alarms) do
         local x, y = alarm_position(alarm)
         alarm.sprite:draw(alarm.spritesheet, x, y)
         alarm.display:draw(x, y)
         local rect = alarm.config.hitbox:to_rect(x, y)
-        love.graphics.rectangle('line', rect.x, rect.y, rect.w, rect.h)
-        if rect:intersect_point(mouse_x, mouse_y) then
-            over = true
+        if is_time_maxed_out(alarm.config) then
+            local sprite = game.assets.images.autoclick_idle
+            if alarm.pressed and alarm.pressed_stopwatch.time < 0.5 then
+                sprite = game.assets.images.autoclick_press
+            end
+            love.graphics.draw(sprite, rect.x + 0.5 * (rect.w - sprite:getWidth()), rect.y + 0.5 * (rect.h - sprite:getHeight()))
         end
+        love.graphics.rectangle('line', rect.x, rect.y, rect.w, rect.h)
     end
-
-    if over then
-        love.graphics.setColor({0, 1, 0, 1})
-    else
-        love.graphics.setColor({1, 0, 0, 1})
-    end
-    love.graphics.rectangle('fill', mouse_x, mouse_y, 10, 10)
-    love.graphics.setColor({1, 1, 1, 1})
 end
 
 function game.draw_shop_area()
     local rect = game.shop.rect
-    love.graphics.setColor({1.0, 0.0, 0.32, 1})
+    love.graphics.setColor(config.shop_bg_color)
     love.graphics.rectangle('fill', rect.x, rect.y, rect.w, rect.h)
     love.graphics.setColor({1, 1, 1, 1})
 
-    draw_text_centered("SHOP", rect.x + rect.w / 2, 0)
+    local shop_text_rect = Rect(rect.x, rect.y, rect.w, rect.h * 0.05)
+    draw_text_inside_rect("SHOP", shop_text_rect, 'center')
 
+    local margin_left = rect.w * config.shop.margin_left
     for _, button in ipairs(game.shop.buttons) do
-        local scale, offset_x = button:layout(rect.w, config.shop.margin_left)
+        local scale, offset_x = button:layout(rect.w, margin_left)
         local x = button.position.x + offset_x
         local y = button.position.y
         button:draw(x, y, scale, offset_x)

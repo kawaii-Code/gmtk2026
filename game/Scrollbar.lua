@@ -67,12 +67,11 @@ function Scrollbar:draw(scrollbar_area)
         return
     end
 
-    love.graphics.setColor({0, 1, 1, 1})
+    love.graphics.setColor(config.scrollbar_bg)
     love.graphics.rectangle('fill', scrollbar_area.x, scrollbar_area.y, scrollbar_area.w, scrollbar_area.h)
-    love.graphics.setColor({1, 1, 1, 1})
 
     local rect = self:rect(scrollbar_area)
-    love.graphics.setColor({1, 0, 0, 1})
+    love.graphics.setColor(config.scrollbar_fg)
     love.graphics.rectangle('fill', rect.x, rect.y, rect.w, rect.h)
     love.graphics.setColor({1, 1, 1, 1})
 end

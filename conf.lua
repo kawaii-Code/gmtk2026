@@ -8,6 +8,7 @@ Timer = require('game.Timer')
 Hitbox = require('game.Hitbox')
 Stopwatch = require('game.Stopwatch')
 ShopButton = require('game.ShopButton')
+MoneyEffect = require('game.MoneyEffect')
 Scrollbar = require('game.Scrollbar')
 SimpleClickMinigame = require('game.SimpleClickMinigame')
 FishingMinigame = require('game.FishingMinigame')
@@ -56,30 +57,37 @@ config.shop_button_hover_scale = 1.05
 config.scroll_strength = 0.01 -- 1% за один микро-прокрутку колеса
 
 config.shop = {
-    margin_top = 40,
-    margin_left = 20,
+    margin_left = 0.03,
     button_spacing = 15,
 }
 
-config.starting_money = 10000
+config.shop_horizontal_screen_percentage = 0.4
 
-config.cursor_size = 40
+config.starting_money = 10
+
+config.cursor_size = 0.12
 
 local r,g,b,a = lume.color("#474152")
 config.font_color = {r, g, b, a}
+r,g,b,a = lume.color("#CBBFCF")
+config.shop_bg_color = {r, g, b, a}
+r,g,b,a = lume.color("#f4d2cd")
+config.bg_color = {r, g, b, a}
+config.money_effect_color = {0, 1, 0, 1}
+config.scrollbar_bg = config.shop_bg_color
+config.scrollbar_fg = config.font_color
 
 config.scrollbar_width = 25
 
+
 -- В каком порядке они здесь, в таком же порядке будут и в магазине
+-- СЛАВЕ: наверное удобнее будет создавать апгрейды не вручную здесь
+-- в таблице, а ниже написать какой-нибудь цикл, где ты эти значения
+-- наделаешь.
 config.alarms = {
     {
         name = "basic_clock",
-
-        shelf = 1,
-        x_position = 150,
-
         hitbox = Hitbox(0, 70, 75, 80),
-        display_animation = "clock_clock",
         animation_full_path = "release_clock_clock",
         sprite_name = "release_clock",
         sprite_name_mini = "basic_clock",
@@ -89,17 +97,17 @@ config.alarms = {
             ["buy"] = {
                 cost = 10,
                 earn = 5,
-                time = 3,
+                time = 5,
             },
             ["time"] = {
-                { cost = 12, bonus = 1 }, -- -1 секунда времени за 10 бачей
-                { cost = 24, bonus = 1 },
-                { cost = 36, bonus = 1 },
+                { cost = 5, bonus = 1 }, -- -1 секунда времени за 10 бачей
+                { cost = 10, bonus = 1 },
+                { cost = 20, bonus = 1 },
             },
             ["earn"] = {
-                { cost = 69, bonus = 5 }, -- +5 дохода за 20 бачей
-                { cost = 101, bonus = 5 },
-                { cost = 670, bonus = 5 },
+                { cost = 10, bonus = 5 }, -- +5 дохода за 20 бачей
+                { cost = 20, bonus = 5 },
+                { cost = 40, bonus = 5 },
             },
             ["count"] = {
                 { cost = 50, bonus = 1 }, -- специальная хрень
@@ -109,12 +117,7 @@ config.alarms = {
 
     {
         name = "digital",
-        cost = 10,
-        earn = 5,
-        time = 3,
-        shelf = 1,
         hitbox = Hitbox(0, 80, 100, 70),
-        display_animation = "countdown",
         animation_full_path = "release_countdown",
         sprite_name = "release_normis", -- Очень плохое название!! (Оно берется от имени файла)
         sprite_name_mini = "digital",
@@ -122,9 +125,9 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 10,
-                earn = 5,
-                time = 3,
+                cost = 25,
+                earn = 10,
+                time = 4,
             },
             ["time"] = {
                 { cost = 10, bonus = 1 }, -- -1 секунда времени за 10 бачей
@@ -143,14 +146,38 @@ config.alarms = {
     },
 
     {
+        name = "crab",
+        hitbox = Hitbox(0, 80, 90, 70),
+        animation_full_path = "release_countdown_crab",
+        sprite_name = "release_crab",
+        sprite_name_mini = "crab",
+        Minigame = SimpleClickMinigame,
+
+        upgrades = {
+            ["buy"] = {
+                cost = 1000,
+                earn = 500,
+                time = 15,
+            },
+            ["time"] = {
+                { cost = 1000, bonus = 3 },
+                { cost = 1500, bonus = 4 },
+                { cost = 2000, bonus = 5 },
+            },
+            ["earn"] = {
+                { cost = 1000, bonus = 500 },
+                { cost = 6942, bonus = 750 },
+                { cost = 9999, bonus = 1000 },
+            },
+            ["count"] = {
+                { cost = 2000, bonus = 1 },
+            },
+        },
+    },
+
+    {
         name = "aquarium",
-        cost = 30,
-        earn = 10,
-        time = 10,
-        shelf = 2,
         hitbox = Hitbox(0, 20, 130, 130),
-        animation_full_path = "release_clock_clock",
-        display_animation = "aquarium_clock",
         animation_full_path = "release_aquarium-clock",
         sprite_name = "release_aquarium",
         sprite_name_mini = "aquarium",
@@ -179,8 +206,6 @@ config.alarms = {
     },
 }
 
-
-config.shop_horizontal_screen_percentage = 0.3  -- 30% по горизонтали занимает магазин
 
 config.mouse_scroll_strength = 10
 

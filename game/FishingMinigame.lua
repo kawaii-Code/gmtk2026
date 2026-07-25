@@ -141,7 +141,8 @@ function FishingMinigame:update(dt)
         self:set_win_status()
     end
 
-    if self.status == 'win' and game.input.mouse.just_pressed then
+    if self.status == 'win' then
+        game.assets.sounds.win_minigame:play()
         return true
     end
 

@@ -7,6 +7,7 @@ function ShopButton:constructor(alarm_config)
 
     self.scale = 1
     self.hovered = false
+    self.hovered_last_frame = false
     self.hover_scale_timer = Timer(0.07)
 end
 
@@ -18,36 +19,10 @@ function ShopButton:on_buy()
 end
 
 function ShopButton:update(dt)
-    if self.second_mode then
-        return
+    if self.hovered and not self.hovered_last_frame then
+        game.assets.sounds.click:play()
     end
-
-    if self.hovered then
-        if self.hover_scale_timer:done() then
-            if self.scale < config.shop_button_hover_scale then
-                self.hover_scale_timer:reset()
-                game.assets.sounds["click"]:play()
-            end
-        else
-            self.hover_scale_timer:update(dt)
-            self.scale = square_lerp(1, config.shop_button_hover_scale, self.hover_scale_timer:progress())
-            if self.hover_scale_timer:done() then
-                self.scale = config.shop_button_hover_scale
-            end
-        end
-    else
-        if self.hover_scale_timer:done() then
-            if self.scale > 1 then
-                self.hover_scale_timer:reset()
-            end
-        else
-            self.hover_scale_timer:update(dt)
-            if self.hover_scale_timer:done() then
-                self.scale = 1
-            end
-            self.scale = square_lerp(config.shop_button_hover_scale, 1, self.hover_scale_timer:progress())
-        end
-    end
+    self.hovered_last_frame = self.hovered
 end
 
 function ShopButton:layout(width, mx)
@@ -89,15 +64,6 @@ function ShopButton:draw_block(rect, upgrade, minus, maxed_out)
     else
         draw_text_inside_rect(upgrade.cost .. "$ (" .. plus .. upgrade.bonus .. ")", cost_text, 'center')
     end
-end
-
-function draw_alarm_icon_inside_rect(config, rect)
-    local spritesheet = game.assets.images[config.sprite_name]
-    local animation = game.simple_sprites[config.sprite_name_mini]
-    local scale = math.max(rect.w / 150, rect.h / 150)
-    local sw = 150 * scale
-    local sh = 150 * scale
-    animation:draw(spritesheet, rect.x + 0.5 * (rect.w - sw), rect.y - 0.5 * (rect.h - sh), 0, scale)
 end
 
 function ShopButton:draw(x, y, scale, offset_x)
@@ -144,22 +110,29 @@ function ShopButton:draw(x, y, scale, offset_x)
         self:draw_block(self.rpc, self.alarm.upgrades["count"][1]) -- TODO?
         draw_sprite_inside_rect(game.assets.images.UI_icon, icon_rect)
         local count_rect = icon_rect:clone()
-        count_rect.x = count_rect.x + self.rpc.w * 0.5
-        count_rect.w = count_rect.w * 0.8
+        count_rect.x = count_rect.x + self.rpc.w * 0.53
+        count_rect.w = count_rect.w * 0.75
         count_rect.h = count_rect.h * 0.5
         count_rect.y = count_rect.y + self.rpc.h * 0.12
-        draw_rectangle(count_rect)
         draw_text_inside_rect("x" .. game.alarm_stats[self.alarm.name].count, count_rect)
-        draw_alarm_icon_inside_rect(self.alarm, icon_rect)
+        draw_sprite_inside_rect(game.assets.images["icons_" .. self.alarm.sprite_name_mini], icon_rect)
 
         self:draw_block(self.rac, self.alarm.upgrades["time"][game.alarm_stats[self.alarm.name].time_upgrade_level], true, is_time_maxed_out(self.alarm))
         local time_rect = count_rect:clone()
         time_rect.x = self.rac.x
         time_rect.w = self.rac.w
         time_rect.y = time_rect.y - self.rac.h * 0.18
-        draw_text_inside_rect("period", time_rect, 'center')
-        time_rect.y = time_rect.y + self.rac.h * 0.3
-        draw_text_inside_rect(game.alarm_stats[self.alarm.name].time .. "s", time_rect, 'center')
+        if is_time_pre_maxed_out(self.alarm) or is_time_maxed_out(self.alarm) then
+            time_rect.x = time_rect.x + self.rac.w * 0.1
+            time_rect.w = time_rect.w * 0.8
+            draw_text_inside_rect("autoclick", time_rect, 'center')
+            time_rect.y = time_rect.y + self.rac.h * 0.3
+            draw_text_inside_rect(game.alarm_stats[self.alarm.name].time .. "s", time_rect, 'center')
+        else
+            draw_text_inside_rect("period", time_rect, 'center')
+            time_rect.y = time_rect.y + self.rac.h * 0.3
+            draw_text_inside_rect(game.alarm_stats[self.alarm.name].time .. "s", time_rect, 'center')
+        end
 
         self:draw_block(self.rlc, self.alarm.upgrades["earn"][game.alarm_stats[self.alarm.name].earn_upgrade_level], false, is_earn_maxed_out(self.alarm))
         local earn_rect = count_rect:clone()
@@ -169,7 +142,6 @@ function ShopButton:draw(x, y, scale, offset_x)
         draw_text_inside_rect("income", earn_rect, 'center')
         earn_rect.y = earn_rect.y + self.rlc.h * 0.3
         draw_text_inside_rect(game.alarm_stats[self.alarm.name].earn .. "$", earn_rect, 'center')
-        draw_rectangle(earn_rect)
 
         game.bold = false
 
@@ -183,37 +155,46 @@ function ShopButton:draw(x, y, scale, offset_x)
             sprite = game.assets.images.UI_big_selected
         end
     end
+
     love.graphics.draw(sprite, x, y, 0, scale)
-    love.graphics.draw(game.assets.images.bonus_icons, x, y, 0, scale)
-    love.graphics.draw(game.assets.images.icon, x, y, 0, scale)
+
+    local icon_rect = Rect(
+        x + self.hitbox.width * 0.01, y + self.hitbox.height * 0.05,
+        self.hitbox.width * 0.3,
+        self.hitbox.height * 0.9
+    )
 
     local text_1_rect = Rect(
-        x + self.hitbox.width * 0.22,
-        y + self.hitbox.height * 0.14,
-        self.hitbox.width * 0.4,
-        self.hitbox.height * 0.28
+        x + self.hitbox.width * 0.33,
+        y + self.hitbox.height * 0.2,
+        self.hitbox.width * 0.36,
+        self.hitbox.height * 0.21
     )
 
     local text_2_rect = Rect(
-        x + self.hitbox.width * 0.22,
-        text_1_rect.y + self.hitbox.height * 0.38,
-        self.hitbox.width * 0.4,
-        self.hitbox.height * 0.28
+        x + self.hitbox.width * 0.33,
+        text_1_rect.y + self.hitbox.height * 0.3,
+        self.hitbox.width * 0.36,
+        self.hitbox.height * 0.21
     )
 
     local cost_text_rect = Rect(
-        x + self.hitbox.width * 0.58,
-        text_1_rect.y + self.hitbox.height * 0.38,
-        self.hitbox.width * 0.4,
-        self.hitbox.height * 0.28
+        x + self.hitbox.width * 0.7,
+        y + self.hitbox.height * 0.05,
+        self.hitbox.width * 0.3,
+        self.hitbox.height * 0.9
     )
+
+    draw_sprite_inside_rect_min(game.assets.images["UI_icon"], icon_rect)
+    draw_sprite_inside_rect_min(game.assets.images["icons_" .. self.alarm.sprite_name_mini], icon_rect)
+    draw_rectangle(icon_rect)
+
+    draw_text_inside_rect("income " .. self.alarm.upgrades["buy"].earn .. "$", text_1_rect)
 
     local tip_x = x + self.hitbox.width * 0.24
     local y1 = y + self.hitbox.height * 0.17
     local y2 = y1 + self.hitbox.height * 0.39
-    draw_text_inside_rect(self.alarm.upgrades["buy"].time, text_1_rect)
-    draw_text_inside_rect("+" .. self.alarm.upgrades["buy"].earn, text_2_rect)
-    draw_text_inside_rect(self.alarm.upgrades["buy"].cost, cost_text_rect, 'center')
+    draw_text_inside_rect(self.alarm.upgrades["buy"].cost .. "$", cost_text_rect, 'center')
 end
 
 return ShopButton

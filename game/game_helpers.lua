@@ -74,23 +74,41 @@ function draw_sprite(e)
     end
 end
 
-function draw_text_inside_rect(text, rect, align)
+function draw_text_inside_rect(text, rect, align, color)
     align = align or 'left'
+    color = color or config.font_color
 
     local font_height = math.floor(rect.h / 2) * 2
     font_height = math.clamp(font_height, config.min_font_size, config.max_font_size)
-    local large_enough_font = game.assets.fonts.shop[font_height]
+
+    local fonts = game.assets.fonts.shop
     if game.bold then
-        large_enough_font = game.assets.fonts.shop_bold[font_height]
+        fonts = game.assets.fonts.shop_bold
     end
 
-    love.graphics.setColor(config.font_color)
+    local large_enough_font = fonts[font_height]
+    local text_width = large_enough_font:getWidth(text)
+    if text_width > rect.w then
+        local i = config.min_font_size
+        while i < config.max_font_size do
+            local w = fonts[i]:getWidth(text)
+            if w >= rect.w then
+                break
+            end
+            i = i + 2
+        end
+
+        large_enough_font = fonts[i]
+        font_height = i
+    end
+
+    love.graphics.setColor(color)
     if align == 'left' then
-        love.graphics.print(text, large_enough_font, rect.x, rect.y)
+        love.graphics.print(text, large_enough_font, rect.x, rect.y + 0.5 * (rect.h - font_height))
     elseif align == 'center' then
         local text_width = large_enough_font:getWidth(text)
-        local rect_center = rect.x + 0.5 * rect.w
-        love.graphics.print(text, large_enough_font, rect_center - text_width * 0.5, rect.y)
+        -- print(rect.y, rect.h, font_height, rect.y + 0.5 * (rect.h - font_height))
+        love.graphics.print(text, large_enough_font, rect.x + 0.5 * (rect.w - text_width), rect.y + 0.5 * (rect.h - large_enough_font:getHeight()))
     else
         error('align')
     end
@@ -101,6 +119,14 @@ function draw_sprite_inside_rect(sprite, rect)
     local scale = math.max(rect.w / sprite:getWidth(), rect.h / sprite:getHeight())
     love.graphics.draw(sprite, rect.x, rect.y, 0, scale)
 end
+
+function draw_sprite_inside_rect_min(sprite, rect)
+    local scale = math.min(rect.w / sprite:getWidth(), rect.h / sprite:getHeight())
+    local sw = scale * sprite:getWidth()
+    local sh = scale * sprite:getHeight()
+    love.graphics.draw(sprite, rect.x + 0.5 * (rect.w - sw), rect.y + 0.5 * (rect.h - sh), 0, scale)
+end
+
 
 function draw_text_centered(text, x, y, font)
     font = font or game.assets.fonts.shop[18]
@@ -158,13 +184,16 @@ function layout_shop_screen()
         shop_rect.w = shop_rect.w - config.scrollbar_width
     end
 
-    local x = shop_rect.x + config.shop.margin_left
-    local y = shop_rect.y + config.shop.margin_top
+    local scrollbar_fix = shop_width - config.scrollbar_width
+    local margin_left = scrollbar_fix * config.shop.margin_left
+    local spacing = shop_rect.h * 0.03
+    local x = shop_rect.x + margin_left
+    local y = shop_rect.y + shop_rect.h * 0.07
     for _, button in pairs(game.shop.buttons) do
-        button:layout(shop_rect.w, config.shop.margin_left)
+        button:layout(scrollbar_fix, margin_left)
         button.position.x = x
         button.position.y = y + game.shop.scrollbar:pixel_scroll()
-        y = y + button.hitbox.height + config.shop.button_spacing
+        y = y + button.hitbox.height + spacing
     end
 
     game.shop.rect = shop_rect
@@ -173,6 +202,10 @@ end
 
 function is_time_maxed_out(alarm_config)
     return game.alarm_stats[alarm_config.name].time_upgrade_level == 1 + #alarm_config.upgrades["time"]
+end
+
+function is_time_pre_maxed_out(alarm_config)
+    return game.alarm_stats[alarm_config.name].time_upgrade_level == #alarm_config.upgrades["time"]
 end
 
 function is_earn_maxed_out(alarm_config)
@@ -186,6 +219,7 @@ function alarm_position(alarm)
     y = y - h
     y = y + game.alarm.scrollbar:pixel_scroll()
     y = y + 5
+    y = y + alarm.y_offset
     return x, y
 end
 
