@@ -9,10 +9,10 @@ function FishingMinigame:constructor(alarm)
 
     self.float = {
         x = 30, min_x = 13+2, max_x = 374-(21-10)-4,
-        y = 40, min_y = 40, max_y = 159,
+        y = 40, min_y = 40, max_y = 149,
         is_go_left = false, -- для движения
-        speed_x = 60,
-        speed_y = 60,
+        speed_x = 200,
+        speed_y = 200,
         status = 'preview',
             -- wait — двигается влево-вправо в ожидании клика
             -- attack — опускается вниз пока не достигнет дна или не коснется рыбы
@@ -36,7 +36,7 @@ function FishingMinigame:constructor(alarm)
         x = 40, min_x = 20, max_x = 310,
         is_go_left = false,
         y = 120,
-        speed = 50,
+        speed = 200,
         status = 'swim',
             -- swim — двигается влево-вправо
             -- win — застывает в победном положении
