@@ -47,7 +47,13 @@ function game.load()
         clock_clock = createGrid(43, 43, game.assets.images.release_clock_clock),
     }
 
+
     local grids = game.assets.images.grids
+    game.simple_sprites = {}
+    game.simple_sprites["basic_clock"] = anim8.newAnimation(grids.basic_clock(1, 1), 1)
+    game.simple_sprites["digital"] = anim8.newAnimation(grids.digital_clock(1, 1), 1)
+    game.simple_sprites["aquarium"] = anim8.newAnimation(grids.aquarium(1, 1), 1)
+
     game.animations["digital_press_in"] = anim8.newAnimation(grids.digital_clock('2-5', 1), 0.1)
     game.animations["digital_press_out"] = anim8.newAnimation(grids.digital_clock('6-8', 1), 0.1)
     game.animations["digital_idle"] = anim8.newAnimation(grids.digital_clock(1, 1), 1)
@@ -86,7 +92,8 @@ function game.load()
     -- Игровая зона
     game.alarm = {
         scrollbar = Scrollbar(),
-        shelf_count = 20,
+        shelf_count = 1,
+        spot = 0,
         content_height = 0,
         canvas = love.graphics.newCanvas(config.alarm.width, desktop_height),
     }
@@ -102,6 +109,7 @@ function game.load()
 
     -- Будильники
     game.alarms = {}
+    game.alarm_stats = {}
 
     game.minigame = nil
 
@@ -131,7 +139,7 @@ function game.update(dt)
         local x, y = alarm_position(alarm)
 
         local alarm_rect = alarm.config.hitbox:to_rect(x, y)
-        if alarm_rect:intersect_point(mouse_x, mouse_y) then
+        if not game.minigame and alarm_rect:intersect_point(mouse_x, mouse_y) then
             game.player.can_click = true
             if alarm.timer:done() and game.input.mouse.just_pressed then
                 game.minigame = alarm.config.Minigame(alarm)
@@ -167,30 +175,75 @@ function game.update(dt)
     for _, button in ipairs(game.shop.buttons) do
         button:update(dt)
 
-        local button_rect = button.hitbox:to_rect(button.position.x, button.position.y)
-        if button_rect:intersect_point(mouse_x, mouse_y) then
-            game.player.can_click = true
-            button.hovered = true
-            if game.input.mouse.just_pressed then
-                if not button.second_mode and game.bank:can_buy(button.alarm) then
-                    game.bank:buy(button.alarm)
-                    button:on_buy()
-                    button.bought = true
-                    local alarm = Alarm(button.alarm)
-                    table.insert(game.alarms, alarm)
-                else
-                    game.assets.sounds.error:play()
+        if button.second_mode then
+            if button.rpc:intersect_point(mouse_x, mouse_y) then
+                game.player.can_click = true
+                if game.input.mouse.just_pressed then
+                    local upgrade_cost = game.alarm_stats[button.alarm.name].next_count_upgrade_cost
+                    if game.bank:has(upgrade_cost) then
+                        game.bank:spend(upgrade_cost)
+                        game.add_alarm(button.alarm)
+                        game.alarm_stats.next_count_upgrade_cost = 2 * upgrade_cost
+                    end
+                end
+            elseif button.rac:intersect_point(mouse_x, mouse_y) then
+                game.player.can_click = true
+                if game.input.mouse.just_pressed then
+                    local upgrade = button.alarm.upgrades["time"][game.alarm_stats[button.alarm.name].time_upgrade_level]
+                    local upgrade_cost = upgrade.cost
+                    if not is_time_maxed_out(button.alarm) and game.bank:has(upgrade_cost) then
+                        game.bank:spend(upgrade_cost)
+                        game.alarm_stats[button.alarm.name].time = game.alarm_stats[button.alarm.name].time - upgrade.bonus
+                        game.alarm_stats[button.alarm.name].time_upgrade_level = game.alarm_stats[button.alarm.name].time_upgrade_level + 1
+                    end
+                end
+            elseif button.rlc:intersect_point(mouse_x, mouse_y) then
+                game.player.can_click = true
+                if game.input.mouse.just_pressed then
+                    local upgrade = button.alarm.upgrades["earn"][game.alarm_stats[button.alarm.name].earn_upgrade_level]
+                    local upgrade_cost = upgrade.cost
+                    if not is_earn_maxed_out(button.alarm) and game.bank:has(upgrade_cost) then
+                        game.bank:spend(upgrade_cost)
+                        game.alarm_stats[button.alarm.name].earn = game.alarm_stats[button.alarm.name].earn + upgrade.bonus
+                        game.alarm_stats[button.alarm.name].earn_upgrade_level = game.alarm_stats[button.alarm.name].earn_upgrade_level + 1
+                    end
                 end
             end
         else
-            button.hovered = false
+            local button_rect = button.hitbox:to_rect(button.position.x, button.position.y)
+            if button_rect:intersect_point(mouse_x, mouse_y) then
+                game.player.can_click = true
+                button.hovered = true
+                if game.input.mouse.just_pressed then
+                    if not button.second_mode and game.bank:can_buy(button.alarm) then
+                        game.bank:buy(button.alarm)
+                        button:on_buy()
+                        button.bought = true
+
+                        game.alarm_stats[button.alarm.name] = {
+                            time = button.alarm.upgrades["buy"].time,
+                            earn = button.alarm.upgrades["buy"].earn,
+                            count = 1,
+                            time_upgrade_level = 1,
+                            earn_upgrade_level = 1,
+                            next_count_upgrade_cost = 20,
+                        }
+
+                        game.add_alarm(button.alarm)
+                    else
+                        game.assets.sounds.error:play()
+                    end
+                end
+            else
+                button.hovered = false
+            end
         end
     end
 
     if game.minigame then
         if game.minigame:update(dt) then
-            game.bank:earn(game.minigame.alarm.config.earn)
-            game.minigame:on_done()
+            game.bank:earn(game.alarm_stats[game.minigame.alarm.config.name].earn)
+            game.minigame.alarm.timer:reset_with_new_duration(game.alarm_stats[game.minigame.alarm.config.name].time)
             game.minigame.alarm:on_minigame_done()
             game.minigame = nil
         end
@@ -202,10 +255,7 @@ function game.draw()
 
     local alarm_area_canvas = game.alarm.canvas
 
-    love.graphics.clear({0.2, 0.2, 0.2, 1})
-    love.graphics.setColor({0.3, 0.3, 0.3, 1})
-    love.graphics.rectangle('fill', game.alarm.full_rect.x, game.alarm.full_rect.y, game.alarm.full_rect.w, game.alarm.full_rect.h)
-    love.graphics.setColor({1, 1, 1, 1})
+    love.graphics.clear({0.0, 0.0, 0.0, 1})
 
     love.graphics.setCanvas(alarm_area_canvas)
     game.draw_alarm_area()
@@ -217,7 +267,6 @@ function game.draw()
             just_pressed = game.player.mouse_just_pressed,
             pressed = game.input.mouse.pressed,
         }
-        -- print(game.alarm.rect.h)
         game.minigame:draw(game.alarm.rect.h, mouse)
     end
     love.graphics.setCanvas()
@@ -243,20 +292,17 @@ function game.draw()
 end
 
 function game.draw_alarm_area()
-    love.graphics.clear({0.3, 0.3, 0.3, 1})
-
+    love.graphics.draw(game.assets.images.release_wallpaper, 0, 0)
     -- В прямоугольнике X это где нужно нарисовать канвас по x
     -- w и h это в 400x600+-(по высоте окна) координатах
     local rect = game.alarm.rect
 
     local mouse_x, mouse_y = translate_mouse_to_alarm_screen()
 
-    local x = 0
+    local x = config.alarm.shelf.margin_horizontal
     local y = config.alarm.margin_top + game.alarm.scrollbar:pixel_scroll()
     for _ = 1, game.alarm.shelf_count do
-        love.graphics.setColor({0.8, 0.7, 0.7, 1})
-        love.graphics.rectangle('fill', config.alarm.shelf.margin_horizontal, y, rect.w - 2 * config.alarm.shelf.margin_horizontal, config.alarm.shelf.height)
-        love.graphics.setColor({1, 1, 1, 1})
+        love.graphics.draw(game.assets.images.release_shelf, x, y)
         y = y + config.alarm.shelf.height + config.alarm.shelf.spacing
     end
 
@@ -299,6 +345,16 @@ function game.draw_shop_area()
     local screen_width, screen_height = love.graphics.getDimensions()
     local shop_scrollbar_area = Rect(screen_width - config.scrollbar_width, 0, config.scrollbar_width, screen_height)
     game.shop.scrollbar:draw(shop_scrollbar_area)
+end
+
+function game.add_alarm(config)
+    local shelf = 1 + math.floor(game.alarm.spot / 3)
+    if shelf > game.alarm.shelf_count then
+        game.alarm.shelf_count = game.alarm.shelf_count + 1
+    end
+    local alarm = Alarm(config, shelf, 120 * (game.alarm.spot % 3))
+    game.alarm.spot = game.alarm.spot + 1
+    table.insert(game.alarms, alarm)
 end
 
 return game

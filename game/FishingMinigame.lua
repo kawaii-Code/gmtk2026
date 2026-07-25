@@ -55,10 +55,6 @@ function FishingMinigame:draw_fishing_line(x, y1, y2)
     end
 end
 
-function FishingMinigame:on_done()
-    self.alarm.timer:reset()
-end
-
 function FishingMinigame:float_update(dt)
     local mouse = game.input.mouse
     if self.float.status == 'wait' then

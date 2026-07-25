@@ -1,8 +1,7 @@
 local Alarm = require('libraries.knife.base'):extend()
 
-function Alarm:constructor(config)
+function Alarm:constructor(config, shelf, x_position)
     self.config = config
-    self.shelf = config.shelf
     self.spritesheet = game.assets.images[config.sprite_name]
     self.sprite = game.animations[config.sprite_name_mini .. "_idle"]
     self.pressed = false
@@ -12,12 +11,14 @@ function Alarm:constructor(config)
     print(self.config.name)
     print(self.config.Minigame)
 
-    self.x_position = config.x_position or 0
+    print(shelf, x_position)
+    self.shelf = shelf
+    self.x_position = x_position
     self.x_offset = 0
 
     self.display = AlarmDisplay(config.display_animation, config.animation_full_path)
 
-    self.timer = Timer(self.config.time)--, "start")
+    self.timer = Timer(game.alarm_stats[self.config.name].time)--, "start")
     self.timer_done_last_frame = false
 end
 

@@ -171,12 +171,21 @@ function layout_shop_screen()
     game.shop.content_height = y
 end
 
+function is_time_maxed_out(alarm_config)
+    return game.alarm_stats[alarm_config.name].time_upgrade_level == 1 + #alarm_config.upgrades["time"]
+end
+
+function is_earn_maxed_out(alarm_config)
+    return game.alarm_stats[alarm_config.name].earn_upgrade_level == 1 + #alarm_config.upgrades["earn"]
+end
+
 function alarm_position(alarm)
     local x = config.alarm.shelf.margin_horizontal + alarm.x_position + alarm.x_offset
     local y = config.alarm.margin_top + (alarm.shelf - 1) * (config.alarm.shelf.spacing + config.alarm.shelf.height)
     local w, h = alarm.sprite:getDimensions()
     y = y - h
     y = y + game.alarm.scrollbar:pixel_scroll()
+    y = y + 5
     return x, y
 end
 

@@ -38,7 +38,7 @@ config.player.run_speed = 25
 config.alarm = {
     width = 400,
     height = 600,
-    margin_top = 100,
+    margin_top = 150,
     shelf = {
         margin_horizontal = 5,
         height = 20,
@@ -70,30 +70,45 @@ config.font_color = {r, g, b, a}
 
 config.scrollbar_width = 25
 
+-- В каком порядке они здесь, в таком же порядке будут и в магазине
 config.alarms = {
     {
         name = "basic_clock",
-        shop_icon = "icon",
-        cost = 10,
-        earn = 5,
-        time = 3,
+
         shelf = 1,
         x_position = 150,
+
         hitbox = Hitbox(0, 70, 75, 80),
         display_animation = "clock_clock",
         animation_full_path = "release_clock_clock",
         sprite_name = "release_clock",
         sprite_name_mini = "basic_clock",
         Minigame = SimpleClickMinigame,
+
         upgrades = {
-            ["time"] = { { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 } },
-            ["earn"] = { { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 } },
-            ["count"] = { { cost = 20 } },
+            ["buy"] = {
+                cost = 10,
+                earn = 5,
+                time = 3,
+            },
+            ["time"] = {
+                { cost = 12, bonus = 1 }, -- -1 секунда времени за 10 бачей
+                { cost = 24, bonus = 1 },
+                { cost = 36, bonus = 1 },
+            },
+            ["earn"] = {
+                { cost = 69, bonus = 5 }, -- +5 дохода за 20 бачей
+                { cost = 101, bonus = 5 },
+                { cost = 670, bonus = 5 },
+            },
+            ["count"] = {
+                { cost = 50, bonus = 1 }, -- специальная хрень
+            },
         },
     },
+
     {
         name = "digital",
-        shop_icon = "icon",
         cost = 10,
         earn = 5,
         time = 3,
@@ -104,15 +119,31 @@ config.alarms = {
         sprite_name = "release_normis", -- Очень плохое название!! (Оно берется от имени файла)
         sprite_name_mini = "digital",
         Minigame = SimpleClickMinigame,
+
         upgrades = {
-            ["time"] = { { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 } },
-            ["earn"] = { { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 } },
-            ["count"] = { { cost = 20 } },
+            ["buy"] = {
+                cost = 10,
+                earn = 5,
+                time = 3,
+            },
+            ["time"] = {
+                { cost = 10, bonus = 1 }, -- -1 секунда времени за 10 бачей
+                { cost = 10, bonus = 1 },
+                { cost = 10, bonus = 1 },
+            },
+            ["earn"] = {
+                { cost = 20, bonus = 5 }, -- +5 дохода за 20 бачей
+                { cost = 20, bonus = 5 },
+                { cost = 20, bonus = 5 },
+            },
+            ["count"] = {
+                { cost = 20, bonus = 1 }, -- специальная хрень
+            },
         },
     },
+
     {
         name = "aquarium",
-        shop_icon = "icon",
         cost = 30,
         earn = 10,
         time = 10,
@@ -124,10 +155,26 @@ config.alarms = {
         sprite_name = "release_aquarium",
         sprite_name_mini = "aquarium",
         Minigame = FishingMinigame,
+
         upgrades = {
-            ["time"] = { { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 } },
-            ["earn"] = { { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 } },
-            ["count"] = { { cost = 20 } },
+            ["buy"] = {
+                cost = 30,
+                earn = 10,
+                time = 10,
+            },
+            ["time"] = {
+                { cost = 10, bonus = 1 }, -- -1 секунда времени за 10 бачей
+                { cost = 10, bonus = 1 },
+                { cost = 10, bonus = 1 },
+            },
+            ["earn"] = {
+                { cost = 20, bonus = 5 }, -- +5 дохода за 20 бачей
+                { cost = 20, bonus = 5 },
+                { cost = 20, bonus = 5 },
+            },
+            ["count"] = {
+                { cost = 20, bonus = 1 }, -- специальная хрень
+            },
         },
     },
 }

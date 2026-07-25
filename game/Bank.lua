@@ -5,7 +5,7 @@ function Bank:constructor(money)
 end
 
 function Bank:can_buy(alarm_config)
-    return self.money >= alarm_config.cost
+    return self.money >= alarm_config.upgrades["buy"].cost
 end
 
 function Bank:has(count)
@@ -14,7 +14,12 @@ end
 
 function Bank:buy(alarm_config)
     assert(self:can_buy(alarm_config))
-    self.money = self.money - alarm_config.cost
+    self.money = self.money - alarm_config.upgrades["buy"].cost
+end
+
+function Bank:spend(count)
+    assert(self:has(count))
+    self.money = self.money - count
 end
 
 function Bank:earn(amount)
