@@ -8,6 +8,10 @@ function Bank:can_buy(alarm_config)
     return self.money >= alarm_config.cost
 end
 
+function Bank:has(count)
+    return self.money >= count
+end
+
 function Bank:buy(alarm_config)
     assert(self:can_buy(alarm_config))
     self.money = self.money - alarm_config.cost

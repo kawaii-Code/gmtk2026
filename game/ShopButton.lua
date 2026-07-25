@@ -51,10 +51,10 @@ function ShopButton:update(dt)
 end
 
 function ShopButton:layout(width, mx)
-    local scale = ((width - 2 * mx) / game.assets.images.ui_big_available:getWidth())
+    local scale = ((width - 2 * mx) / game.assets.images.UI_big_available:getWidth())
 
-    self.hitbox.width = scale * game.assets.images.ui_big_available:getWidth()
-    self.hitbox.height = scale * game.assets.images.ui_big_available:getHeight()
+    self.hitbox.width = scale * game.assets.images.UI_big_available:getWidth()
+    self.hitbox.height = scale * game.assets.images.UI_big_available:getHeight()
 
     local offset_x = -0.5 * (self.scale - 1.0) * self.hitbox.width
     self.hitbox.width = self.hitbox.width * self.scale
@@ -67,6 +67,22 @@ function ShopButton:layout(width, mx)
     end
 
     return self.scale * scale, offset_x
+end
+
+function ShopButton:draw_block(rect, cost)
+    local sprite = game.assets.images.UI_block_blocked
+    if game.bank:has(cost) then
+        sprite = game.assets.images.UI_block_available
+        if rect:intersect_point(game.input.mouse.x, game.input.mouse.y) then
+            sprite = game.assets.images.UI_block_selected
+        end
+    end
+    draw_sprite_inside_rect(sprite, rect)
+
+    local cost_text = rect:clone()
+    cost_text.h = 0.25 * self.hitbox.height
+    cost_text.y = rect.y + self.hitbox.height - cost_text.h
+    draw_text_inside_rect(cost, cost_text, 'center')
 end
 
 function ShopButton:draw(x, y, scale, offset_x)
@@ -133,25 +149,19 @@ function ShopButton:draw(x, y, scale, offset_x)
         draw_rectangle(avatar_rect)
 
         game.bold = true
-        draw_sprite_inside_rect(game.assets.images.ui_big_available, total_rect)
-        draw_sprite_inside_rect(game.assets.images.ui_square_available, self.rpc)
-        draw_sprite_inside_rect(game.assets.images.ui_square_available, self.rac)
-        draw_sprite_inside_rect(game.assets.images.ui_square_available, self.rlc)
-        draw_text_inside_rect(10, rpc_cost_text, 'center')
-        game.bold = false
-        draw_text_inside_rect(10, rac_cost_text, 'center')
-        draw_text_inside_rect(10, rlc_cost_text, 'center')
-        draw_text_inside_rect("x" .. 1, x1_text_rect, 'center')
+        self:draw_block(self.rpc, self.alarm.upgrades["count"][1].cost)
+        self:draw_block(self.rac, self.alarm.upgrades["time"][1].cost)
+        self:draw_block(self.rlc, self.alarm.upgrades["earn"][1].cost)
         game.bold = false
 
         return
     end
 
-    local sprite = game.assets.images.ui_big_blocked
+    local sprite = game.assets.images.UI_big_blocked
     if game.bank:can_buy(self.alarm) then
-        sprite = game.assets.images.ui_big_available
+        sprite = game.assets.images.UI_big_available
         if self.hovered then
-            sprite = game.assets.images.ui_big_selected
+            sprite = game.assets.images.UI_big_selected
         end
     end
     love.graphics.draw(sprite, x, y, 0, scale)

@@ -85,6 +85,11 @@ config.alarms = {
         sprite_name = "release_clock",
         sprite_name_mini = "basic_clock",
         Minigame = SimpleClickMinigame,
+        upgrades = {
+            ["time"] = { { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 } },
+            ["earn"] = { { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 } },
+            ["count"] = { { cost = 20 } },
+        },
     },
     {
         name = "digital",
@@ -99,6 +104,11 @@ config.alarms = {
         sprite_name = "release_normis", -- Очень плохое название!! (Оно берется от имени файла)
         sprite_name_mini = "digital",
         Minigame = SimpleClickMinigame,
+        upgrades = {
+            ["time"] = { { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 } },
+            ["earn"] = { { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 } },
+            ["count"] = { { cost = 20 } },
+        },
     },
     {
         name = "aquarium",
@@ -114,6 +124,11 @@ config.alarms = {
         sprite_name = "release_aquarium",
         sprite_name_mini = "aquarium",
         Minigame = FishingMinigame,
+        upgrades = {
+            ["time"] = { { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 }, { cost = 10, bonus = 1 } },
+            ["earn"] = { { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 }, { cost = 20, bonus = 5 } },
+            ["count"] = { { cost = 20 } },
+        },
     },
 }
 
