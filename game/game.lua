@@ -40,6 +40,7 @@ function game.load()
         countdown = createGrid(33, 27, game.assets.images.release_countdown),
         aquarium_clock = createGrid(13, 13, game.assets.images["release_aquarium-clock"]),
         fishing_minigame_window = createGrid(374, 185, game.assets.images.release_box_fishing_minigame),
+        float = createGrid(21, 25, game.assets.images.release_float),
         clock_clock = createGrid(43, 43, game.assets.images.release_clock_clock),
     }
 
@@ -62,7 +63,8 @@ function game.load()
     game.animations["clock_clock"] = anim8.newAnimation(grids.clock_clock('1-60', 1), 1)
 
     -- волны в аквариуме 🫠
-    game.animations["fishing_minigame_window_idle"] = anim8.newAnimation(grids.fishing_minigame_window('1-2', 1), 0.5)
+    game.animations["fishing_minigame_window_idle"] = anim8.newAnimation(grids.fishing_minigame_window('1-2', 1), 0.8)
+    game.animations["float_wait"] = anim8.newAnimation(grids.float('1-2', 1), 0.2)
 
     -- Игровые объекты
     game.bank = Bank(config.starting_money)
