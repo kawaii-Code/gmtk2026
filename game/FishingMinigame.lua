@@ -8,19 +8,32 @@ function FishingMinigame:constructor(alarm)
     self.window = game.animations["fishing_minigame_window_idle"]
 
     self.float = {
-        x = 30, min_x = 13, max_x = 374-(21-10),
-        y = 40, min_y = 30, max_y = 100,
+        x = 30, min_x = 13+2, max_x = 374-(21-10)-4,
+        y = 40, min_y = 40, max_y = 159,
         is_go_left = false, -- для движения
-        speed_x = 345,
-        status = 'wait',
+        speed_x = 130,
+        speed_y = 80,
+        status = 'preview',
             -- wait — двигается влево-вправо в ожидании клика
             -- attack — опускается вниз пока не достигнет дна или не коснется рыбы
             -- release — поднимается вверх после неудачной "атаки"
             -- win — застывает в победном положении
-        sprite = game.animations["float_wait"],
+            -- preview — вступительная анимация
+        sprite = game.animations["float"],
         sprite_x = -10,
         sprite_y = -24,
     }
+
+    self.fishing_line = {
+        -- просто картинка размером 4x1 пикселей, из которой состоит вертикальная линия
+        sprite = game.animations["fishing_line"],
+    }
+end
+
+function FishingMinigame:draw_fishing_line(x, y1, y2)
+    for y = y1, y2 - 1 do
+        self.fishing_line.sprite:draw(game.assets.images.release_fishing_line, x, y)
+    end
 end
 
 function FishingMinigame:on_done()
@@ -28,6 +41,7 @@ function FishingMinigame:on_done()
 end
 
 function FishingMinigame:float_update(dt)
+    local mouse = game.input.mouse
     if self.float.status == 'wait' then
 
         if self.float.x >= self.float.max_x then
@@ -41,6 +55,29 @@ function FishingMinigame:float_update(dt)
         else
             self.float.x = self.float.x + self.float.speed_x * dt
         end
+
+        if mouse.just_pressed then
+            self.float.status = 'attack'
+        end
+
+    elseif self.float.status == 'attack' then
+
+        self.float.y = self.float.y + self.float.speed_y * dt
+        if self.float.y >= self.float.max_y then
+            self.float.status = 'release'
+        end
+
+    elseif self.float.status == 'release' then
+
+        self.float.y = self.float.y - self.float.speed_y * dt
+        if self.float.y <= self.float.min_y then
+            self.float.status = 'wait'
+        end
+
+    elseif self.float.status == 'preview' then
+
+        self.float.status = 'wait'
+
     end
 end
 
@@ -59,17 +96,22 @@ function FishingMinigame:draw(screen_height, mouse)
     local height = 100
     local rect = Rect(0, 0.5 * (screen_height - height), 200, height)
 
-    if rect:intersect_point(mouse.x, mouse.y) then
-        -- love.graphics.setColor({0, 1, 0, 1})
-        if mouse.just_pressed then
-            self.completed = true
-        end
-    end
+    -- if rect:intersect_point(mouse.x, mouse.y) then
+    --     -- love.graphics.setColor({0, 1, 0, 1})
+    --     if mouse.just_pressed then
+    --         self.completed = true
+    --     end
+    -- end
 
     self.window:draw(game.assets.images.release_box_fishing_minigame,  X, Y)
+
     local float_x = self.float.x + self.float.sprite_x + X
     local float_y = self.float.y + self.float.sprite_y + Y
+
+    self:draw_fishing_line(float_x+7, Y+3, float_y+3)
+
     self.float.sprite:draw(game.assets.images.release_float, float_x, float_y)
+
 
     -- love.graphics.rectangle('fill', rect.x, rect.y, rect.w, rect.h)
     -- love.graphics.setColor({0.5, 0.5, 0, 1})
