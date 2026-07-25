@@ -42,7 +42,7 @@ function game.load()
         fishing_minigame_window = createGrid(374, 185, game.assets.images.release_box_fishing_minigame),
         float = createGrid(19, 25, game.assets.images.release_float),
         fishing_line = createGrid(4, 1, game.assets.images.release_fishing_line),
-        fish = createGrid(43, 28, game.assets.images.release_fish),
+        fish = createGrid(43, 43, game.assets.images.release_fish),
         clock_clock = createGrid(43, 43, game.assets.images.release_clock_clock),
     }
 
@@ -68,8 +68,9 @@ function game.load()
     game.animations["fishing_minigame_window_idle"] = anim8.newAnimation(grids.fishing_minigame_window('1-2', 1), 0.8)
     game.animations["float"] = anim8.newAnimation(grids.float(1, 1), 1)
     game.animations["float_win"] = anim8.newAnimation(grids.float(2, 1), 1)
-    game.animations["fish"] = anim8.newAnimation(grids.fish(1, 1), 1)
-    game.animations["fish_win"] = anim8.newAnimation(grids.fish(2, 1), 1)
+    game.animations["fish_right"] = anim8.newAnimation(grids.fish(1, 1), 1)
+    game.animations["fish_left"] = anim8.newAnimation(grids.fish(2, 1), 1)
+    game.animations["fish_win"] = anim8.newAnimation(grids.fish(3, 1), 1)
     game.animations["fishing_line"] = anim8.newAnimation(grids.fishing_line(1, 1), 1)
 
     -- Игровые объекты
