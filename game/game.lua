@@ -30,7 +30,8 @@ function game.load()
         return anim8.newGrid(frame_width, frame_height, spritesheet:getPixelWidth(), spritesheet:getPixelHeight())
     end
 
-    game.assets.fonts.shop = load_font_with_different_sizes("assets/fonts/shop.otf")
+    game.assets.fonts.shop = load_font_with_different_sizes("assets/fonts/shop.ttf")
+    game.assets.fonts.shop_bold = load_font_with_different_sizes("assets/fonts/shop_bold.ttf")
     game.assets.sounds = load_sounds_from_directory("assets/sounds")
     game.assets.images = load_images_from_directory("assets/sprites")
     game.assets.images.grids = {
