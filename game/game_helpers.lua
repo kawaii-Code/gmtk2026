@@ -80,6 +80,11 @@ function draw_text_inside_rect(text, rect, align)
     local font_height = math.floor(rect.h / 2) * 2
     font_height = math.clamp(font_height, config.min_font_size, config.max_font_size)
     local large_enough_font = game.assets.fonts.shop[font_height]
+    if game.bold then
+        large_enough_font = game.assets.fonts.shop_bold[font_height]
+    end
+
+    love.graphics.setColor(config.font_color)
     if align == 'left' then
         love.graphics.print(text, large_enough_font, rect.x, rect.y)
     elseif align == 'center' then
@@ -89,17 +94,24 @@ function draw_text_inside_rect(text, rect, align)
     else
         error('align')
     end
+    love.graphics.setColor({1, 1, 1, 1})
 end
 
 function draw_sprite_inside_rect(sprite, rect)
-    local scale = math.min(rect.w / sprite:getWidth(), rect.h / sprite:getHeight())
+    local scale = math.max(rect.w / sprite:getWidth(), rect.h / sprite:getHeight())
     love.graphics.draw(sprite, rect.x, rect.y, 0, scale)
 end
 
 function draw_text_centered(text, x, y, font)
     font = font or game.assets.fonts.shop[18]
+    if game.bold then
+        font = game.assets.fonts.shop_bold[18]
+    end
+
     local text_width = font:getWidth(text)
+    love.graphics.setColor(config.font_color)
     love.graphics.print(text, font, x - text_width * 0.5, y)
+    love.graphics.setColor({1, 1, 1, 1})
 end
 
 function draw_rectangle(r, mode)

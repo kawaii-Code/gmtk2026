@@ -51,10 +51,10 @@ function ShopButton:update(dt)
 end
 
 function ShopButton:layout(width, mx)
-    local scale = ((width - 2 * mx) / game.assets.images.button_off:getWidth())
+    local scale = ((width - 2 * mx) / game.assets.images.ui_big_available:getWidth())
 
-    self.hitbox.width = scale * game.assets.images.button_off:getWidth()
-    self.hitbox.height = scale * game.assets.images.button_off:getHeight()
+    self.hitbox.width = scale * game.assets.images.ui_big_available:getWidth()
+    self.hitbox.height = scale * game.assets.images.ui_big_available:getHeight()
 
     local offset_x = -0.5 * (self.scale - 1.0) * self.hitbox.width
     self.hitbox.width = self.hitbox.width * self.scale
@@ -74,6 +74,12 @@ function ShopButton:draw(x, y, scale, offset_x)
         local margin = self.hitbox.width * 0.01
         x = game.shop.rect.x + margin
         self.hitbox.width = game.shop.rect.w - margin
+
+        local total_rect = Rect(
+            x, y,
+            self.hitbox.width,
+            self.hitbox.height
+        )
 
         self.rpc = Rect(
             x,
@@ -126,17 +132,27 @@ function ShopButton:draw(x, y, scale, offset_x)
 
         draw_rectangle(avatar_rect)
 
+        game.bold = true
+        draw_sprite_inside_rect(game.assets.images.ui_big_available, total_rect)
+        draw_sprite_inside_rect(game.assets.images.ui_square_available, self.rpc)
+        draw_sprite_inside_rect(game.assets.images.ui_square_available, self.rac)
+        draw_sprite_inside_rect(game.assets.images.ui_square_available, self.rlc)
         draw_text_inside_rect(10, rpc_cost_text, 'center')
+        game.bold = false
         draw_text_inside_rect(10, rac_cost_text, 'center')
         draw_text_inside_rect(10, rlc_cost_text, 'center')
         draw_text_inside_rect("x" .. 1, x1_text_rect, 'center')
+        game.bold = false
 
         return
     end
 
-    local sprite = game.assets.images.button_off
+    local sprite = game.assets.images.ui_big_blocked
     if game.bank:can_buy(self.alarm) then
-        sprite = game.assets.images.button_on
+        sprite = game.assets.images.ui_big_available
+        if self.hovered then
+            sprite = game.assets.images.ui_big_selected
+        end
     end
     love.graphics.draw(sprite, x, y, 0, scale)
     love.graphics.draw(game.assets.images.bonus_icons, x, y, 0, scale)

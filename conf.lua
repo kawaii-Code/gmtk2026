@@ -65,6 +65,9 @@ config.starting_money = 10000
 
 config.cursor_size = 40
 
+local r,g,b,a = lume.color("#474152")
+config.font_color = {r, g, b, a}
+
 config.scrollbar_width = 25
 
 config.alarms = {
