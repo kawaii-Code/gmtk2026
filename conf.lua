@@ -73,9 +73,10 @@ r,g,b,a = lume.color("#CBBFCF")
 config.shop_bg_color = {r, g, b, a}
 r,g,b,a = lume.color("#f4d2cd")
 config.bg_color = {r, g, b, a}
-config.money_effect_color = {0, 1, 0, 1}
 config.scrollbar_bg = config.shop_bg_color
-config.scrollbar_fg = config.font_color
+config.money_effect_color = {0, 1, 0, 1}
+r,g,b,a = lume.color("#7d7390")
+config.scrollbar_fg = {r, g, b, a}--config.font_color
 
 config.scrollbar_width = 25
 
@@ -96,12 +97,12 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 10,
+                cost = 5,
                 earn = 5,
                 time = 5,
             },
             ["time"] = {
-                { cost = 25, bonus = 1 },
+                { cost = 6, bonus = 1 },
                 { cost = 0, bonus = 1 },
                 { cost = 0, bonus = 1 },
             },
@@ -126,7 +127,8 @@ config.alarms = {
                 time = 30,
             },
             ["time"] = {
-                { cost = 50, bonus = 5 }, -- -1 секунда времени за 10 бачей
+                { cost = 30, bonus = 5 }, -- -1 секунда времени за 10 бачей
+                { cost = 0, bonus = 5 },
                 { cost = 0, bonus = 5 },
                 { cost = 0, bonus = 5 },
             },
@@ -145,7 +147,7 @@ config.alarms = {
         upgrades = {
             ["buy"] = {
                 cost = 100,
-                earn = 60,
+                earn = 50,
                 time = 15,
             },
             ["time"] = {
@@ -166,14 +168,14 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 1000,
-                earn = 150,
-                time = 25,
+                cost = 256,
+                earn = 1024,
+                time = 32,
             },
             ["time"] = {
-                { cost = 4000, bonus = 5 },
-                { cost = 0, bonus = 5 },
-                { cost = 0, bonus = 5 },
+                { cost = 512, bonus = 8 },
+                { cost = 0, bonus = 8 },
+                { cost = 0, bonus = 8 },
             },
         },
     },
@@ -190,13 +192,14 @@ config.alarms = {
         upgrades = {
             ["buy"] = {
                 cost = 5000,
-                earn = 400,
-                time = 20,
+                earn = 3000,
+                time = 10,
             },
             ["time"] = {
-                { cost = 7000, bonus = 5 }, -- -1 секунда времени за 10 бачей
-                { cost = 0, bonus = 5 },
-                { cost = 0, bonus = 5 },
+                { cost = 500, bonus = 2 }, -- -1 секунда времени за 10 бачей
+                { cost = 0, bonus = 2 },
+                { cost = 0, bonus = 2 },
+                { cost = 0, bonus = 2 },
             },
         },
     },
@@ -212,12 +215,12 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 10000,
-                earn = 3000,
+                cost = 12500,
+                earn = 15000,
                 time = 60,
             },
             ["time"] = {
-                { cost = 40000, bonus = 5 },
+                { cost = 4000, bonus = 5 },
                 { cost = 0, bonus = 5 },
                 { cost = 0, bonus = 5 },
             },
@@ -235,12 +238,12 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 60000,
-                earn = 1000,
-                time = 10,
+                cost = 30000,
+                earn = 10000,
+                time = 5,
             },
             ["time"] = {
-                { cost = 60000, bonus = 1 },
+                { cost = 5000, bonus = 1 },
                 { cost = 0, bonus = 1 },
                 { cost = 0, bonus = 1 },
             },
@@ -258,7 +261,7 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 100000,
+                cost = 70000,
                 earn = 10000,
                 time = 40,
             },
@@ -272,13 +275,13 @@ config.alarms = {
 }
 
 for _, config in ipairs(config.alarms) do
-    config.upgrades["earn"] = { {cost = 2 * config.upgrades["buy"].cost, bonus = config.upgrades["buy"].earn} }
+    config.upgrades["earn"] = { {cost = math.floor(1.5 * config.upgrades["buy"].cost), bonus = config.upgrades["buy"].earn} }
 
     local first = true
     local last_cost = 0
     for _, v in ipairs(config.upgrades["time"]) do
         if not first then
-            v.cost = math.ceil(1.5 * last_cost)
+            v.cost = math.ceil(1.8 * last_cost)
         end
         last_cost = v.cost
         first = false
