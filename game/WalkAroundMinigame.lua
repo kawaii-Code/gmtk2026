@@ -20,14 +20,14 @@ function WalkAroundMinigame:update(dt)
     self.alarm.x_offset = self.alarm.x_offset + self.speed * math.sign(self.target - alarm_x) * dt
 
     if math.abs(self.target - alarm_x) < 5 then
-        if self.e then
-            return true
-        else
-            self.target = math.random(20, 300)
-        end
+        -- if self.e then
+        --     return true
+        -- else
+        self.target = math.random(20, 300)
+        -- end
     end
 
-    return false
+    return self.e
 end
 
 function WalkAroundMinigame:draw(screen_height, mouse)

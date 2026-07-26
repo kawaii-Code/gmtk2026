@@ -154,11 +154,12 @@ config.alarms = {
             ["buy"] = {
                 cost = 100,
                 earn = 50,
-                time = 15,
+                time = 16,
             },
             ["time"] = {
-                { cost = 600, bonus = 5 },
-                { cost = 0, bonus = 5 },
+                { cost = 50, bonus = 3 },
+                { cost = 0, bonus = 3 },
+                { cost = 0, bonus = 3 },
             },
         },
     },

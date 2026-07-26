@@ -1,14 +1,14 @@
 local AlarmDisplay = require('libraries.knife.base'):extend()
 
 OFFSETS = {
-    ["release_clock_clock"] = { x = 15, y = 90, frame_count = 60 },
+    ["release_clock_clock"] = { x = 16, y = 89, frame_count = 60 },
     ["release_aquarium-clock"] = { x = 71, y = 81, frame_count = 20 },
     ["release_countdown"] = { x = 46, y = 104, frame_count = 100 },
-    ["release_countdown_crab"] = { x = 26, y = 106, frame_count = 100 },
+    ["release_countdown_crab"] = { x = 26, y = 107, frame_count = 100 },
     ["release_old_fashion_clock"] = { x = 38, y = 90, frame_count = 60 },
-    ["release_crocodile_clock"] = { x = 8, y = 100, frame_count = 100 },
+    ["release_crocodile_clock"] = { x = 8, y = 101, frame_count = 100 },
     ["release_shooting_range_clock"] = { x = 50, y = 106, frame_count = 100 },
-    ["release_bear_clock"] = { x = 23, y = 84, frame_count = 60 },
+    ["release_bear_clock"] = { x = 22, y = 84, frame_count = 60 },
     ["release_bomb"] = { x = 45, y = 106, frame_count = 100 },
 }
 
