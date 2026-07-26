@@ -63,7 +63,7 @@ config.shop = {
 
 config.shop_horizontal_screen_percentage = 0.4
 
-config.starting_money = 100000
+config.starting_money = 10
 
 config.cursor_size = 0.12
 
@@ -96,17 +96,14 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 25,
-                earn = 10,
-                time = 4,
+                cost = 10,
+                earn = 5,
+                time = 5,
             },
             ["time"] = {
-                { cost = 10, bonus = 1 }, -- -1 секунда времени за 10 бачей
-                { cost = 10, bonus = 1 },
-                { cost = 10, bonus = 1 },
-            },
-            ["count"] = {
-                { cost = 20, bonus = 1 }, -- специальная хрень
+                { cost = 25, bonus = 1 },
+                { cost = 0, bonus = 1 },
+                { cost = 0, bonus = 1 },
             },
         },
     },
@@ -124,17 +121,14 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 10,
-                earn = 5,
-                time = 5,
+                cost = 25,
+                earn = 25,
+                time = 30,
             },
             ["time"] = {
-                { cost = 5, bonus = 1 }, -- -1 секунда времени за 10 бачей
-                { cost = 10, bonus = 1 },
-                { cost = 20, bonus = 1 },
-            },
-            ["count"] = {
-                { cost = 50, bonus = 1 }, -- специальная хрень
+                { cost = 50, bonus = 5 }, -- -1 секунда времени за 10 бачей
+                { cost = 0, bonus = 5 },
+                { cost = 0, bonus = 5 },
             },
         },
     },
@@ -150,17 +144,13 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 1000,
-                earn = 500,
+                cost = 100,
+                earn = 60,
                 time = 15,
             },
             ["time"] = {
-                { cost = 1000, bonus = 3 },
-                { cost = 1500, bonus = 4 },
-                { cost = 2000, bonus = 5 },
-            },
-            ["count"] = {
-                { cost = 2000, bonus = 1 },
+                { cost = 600, bonus = 5 },
+                { cost = 0, bonus = 5 },
             },
         },
     },
@@ -177,16 +167,13 @@ config.alarms = {
         upgrades = {
             ["buy"] = {
                 cost = 1000,
-                earn = 500,
-                time = 15,
+                earn = 150,
+                time = 25,
             },
             ["time"] = {
-                { cost = 1000, bonus = 3 },
-                { cost = 1500, bonus = 4 },
-                { cost = 2000, bonus = 5 },
-            },
-            ["count"] = {
-                { cost = 2000, bonus = 1 },
+                { cost = 4000, bonus = 5 },
+                { cost = 0, bonus = 5 },
+                { cost = 0, bonus = 5 },
             },
         },
     },
@@ -202,17 +189,14 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 30,
-                earn = 10,
-                time = 10,
+                cost = 5000,
+                earn = 400,
+                time = 20,
             },
             ["time"] = {
-                { cost = 10, bonus = 1 }, -- -1 секунда времени за 10 бачей
-                { cost = 10, bonus = 1 },
-                { cost = 10, bonus = 1 },
-            },
-            ["count"] = {
-                { cost = 20, bonus = 1 }, -- специальная хрень
+                { cost = 7000, bonus = 5 }, -- -1 секунда времени за 10 бачей
+                { cost = 0, bonus = 5 },
+                { cost = 0, bonus = 5 },
             },
         },
     },
@@ -228,17 +212,14 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 1000,
-                earn = 500,
-                time = 15,
+                cost = 10000,
+                earn = 3000,
+                time = 60,
             },
             ["time"] = {
-                { cost = 1000, bonus = 3 },
-                { cost = 1500, bonus = 4 },
-                { cost = 2000, bonus = 5 },
-            },
-            ["count"] = {
-                { cost = 2000, bonus = 1 },
+                { cost = 40000, bonus = 5 },
+                { cost = 0, bonus = 5 },
+                { cost = 0, bonus = 5 },
             },
         },
     },
@@ -254,17 +235,14 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 1000,
-                earn = 500,
-                time = 15,
+                cost = 60000,
+                earn = 1000,
+                time = 10,
             },
             ["time"] = {
-                { cost = 1000, bonus = 3 },
-                { cost = 1500, bonus = 4 },
-                { cost = 2000, bonus = 5 },
-            },
-            ["count"] = {
-                { cost = 2000, bonus = 1 },
+                { cost = 60000, bonus = 1 },
+                { cost = 0, bonus = 1 },
+                { cost = 0, bonus = 1 },
             },
         },
     },
@@ -280,17 +258,14 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 1000,
-                earn = 500,
-                time = 15,
+                cost = 100000,
+                earn = 10000,
+                time = 40,
             },
             ["time"] = {
-                { cost = 1000, bonus = 3 },
-                { cost = 1500, bonus = 4 },
-                { cost = 2000, bonus = 5 },
-            },
-            ["count"] = {
-                { cost = 2000, bonus = 1 },
+                { cost = 100000, bonus = 5 },
+                { cost = 0, bonus = 5 },
+                { cost = 0, bonus = 5 },
             },
         },
     },
@@ -298,6 +273,16 @@ config.alarms = {
 
 for _, config in ipairs(config.alarms) do
     config.upgrades["earn"] = { {cost = 2 * config.upgrades["buy"].cost, bonus = config.upgrades["buy"].earn} }
+
+    local first = true
+    local last_cost = 0
+    for _, v in ipairs(config.upgrades["time"]) do
+        if not first then
+            v.cost = math.ceil(1.5 * last_cost)
+        end
+        last_cost = v.cost
+        first = false
+    end
 end
 
 

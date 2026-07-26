@@ -47,6 +47,10 @@ function game.load()
     }
 
     local grids = game.assets.images.grids
+    for _, config in ipairs(config.alarms) do
+        local name = config.sprite_name_mini
+        grids[name] = createGrid(150, 150, game.assets.images["alarm_" .. name .. "_0"])
+    end
 
     game.assets.sounds["crocodile_alarm"] = game.assets.sounds["aquarium_alarm"]:clone()
     game.assets.sounds["old_fashion_alarm"] = game.assets.sounds["aquarium_alarm"]:clone()
@@ -66,7 +70,6 @@ function game.load()
     game.skins = {}
     for _, config in ipairs(config.alarms) do
         local name = config.sprite_name_mini
-        print("alarm_" .. name .. "_0")
         grids[name] = createGrid(150, 150, game.assets.images["alarm_" .. name .. "_0"])
         for skin = 0, config.skin_count - 1 do
             game.animations[name .. "_" .. skin .. "_press_in"] = anim8.newAnimation(grids[name]('2-5', 1), 0.1)
@@ -368,7 +371,7 @@ function game.draw_alarm_area()
             end
             love.graphics.draw(sprite, rect.x + 0.5 * (rect.w - sprite:getWidth()), rect.y + 0.5 * (rect.h - sprite:getHeight()))
         end
-        love.graphics.rectangle('line', rect.x, rect.y, rect.w, rect.h)
+        -- love.graphics.rectangle('line', rect.x, rect.y, rect.w, rect.h)
     end
 end
 
