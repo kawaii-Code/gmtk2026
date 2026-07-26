@@ -107,7 +107,6 @@ function draw_text_inside_rect(text, rect, align, color)
         love.graphics.print(text, large_enough_font, rect.x, rect.y + 0.5 * (rect.h - font_height))
     elseif align == 'center' then
         local text_width = large_enough_font:getWidth(text)
-        -- print(rect.y, rect.h, font_height, rect.y + 0.5 * (rect.h - font_height))
         love.graphics.print(text, large_enough_font, rect.x + 0.5 * (rect.w - text_width), rect.y + 0.5 * (rect.h - large_enough_font:getHeight()))
     else
         error('align')
@@ -198,6 +197,11 @@ function layout_shop_screen()
 
     game.shop.rect = shop_rect
     game.shop.content_height = y
+end
+
+function count_cost(alarm_config)
+    local n = game.alarm_stats[alarm_config.name].count
+    return alarm_config.upgrades["buy"].cost * math.pow(2, n)
 end
 
 function is_time_maxed_out(alarm_config)

@@ -63,7 +63,7 @@ config.shop = {
 
 config.shop_horizontal_screen_percentage = 0.4
 
-config.starting_money = 1000
+config.starting_money = 100000
 
 config.cursor_size = 0.12
 
@@ -86,38 +86,11 @@ config.scrollbar_width = 25
 -- наделаешь.
 config.alarms = {
     {
-        name = "basic_clock",
-        hitbox = Hitbox(0, 70, 75, 80),
-
-        skin_count = 3,
-        animation_full_path = "release_clock_clock",
-        sprite_name = "release_clock",
-        sprite_name_mini = "basic_clock",
-
-        Minigame = SimpleClickMinigame,
-
-        upgrades = {
-            ["buy"] = {
-                cost = 10,
-                earn = 5,
-                time = 5,
-            },
-            ["time"] = {
-                { cost = 5, bonus = 1 }, -- -1 секунда времени за 10 бачей
-                { cost = 10, bonus = 1 },
-                { cost = 20, bonus = 1 },
-            },
-            ["count"] = {
-                { cost = 50, bonus = 1 }, -- специальная хрень
-            },
-        },
-    },
-
-    {
         name = "digital",
+        skin_count = 4,
         hitbox = Hitbox(0, 80, 100, 70),
         animation_full_path = "release_countdown",
-        sprite_name = "release_normis", -- Очень плохое название!! (Оно берется от имени файла)
+        sprite_name = "alarm_digital",
         sprite_name_mini = "digital",
         Minigame = SimpleClickMinigame,
 
@@ -139,10 +112,39 @@ config.alarms = {
     },
 
     {
+        name = "clock",
+        hitbox = Hitbox(0, 70, 75, 80),
+
+        skin_count = 4,
+        animation_full_path = "release_clock_clock",
+        sprite_name = "alarm_clock",
+        sprite_name_mini = "clock",
+
+        Minigame = SimpleClickMinigame,
+
+        upgrades = {
+            ["buy"] = {
+                cost = 10,
+                earn = 5,
+                time = 5,
+            },
+            ["time"] = {
+                { cost = 5, bonus = 1 }, -- -1 секунда времени за 10 бачей
+                { cost = 10, bonus = 1 },
+                { cost = 20, bonus = 1 },
+            },
+            ["count"] = {
+                { cost = 50, bonus = 1 }, -- специальная хрень
+            },
+        },
+    },
+
+    {
         name = "crab",
+        skin_count = 1,
         hitbox = Hitbox(0, 80, 90, 70),
         animation_full_path = "release_countdown_crab",
-        sprite_name = "release_crab",
+        sprite_name = "alarm_crab",
         sprite_name_mini = "crab",
         Minigame = SimpleClickMinigame,
 
@@ -164,10 +166,37 @@ config.alarms = {
     },
 
     {
+        name = "bear",
+        skin_count = 1,
+        hitbox = Hitbox(0, 80, 90, 70),
+        animation_full_path = "release_bear_clock",
+        sprite_name = "alarm_bear",
+        sprite_name_mini = "bear",
+        Minigame = SimpleClickMinigame,
+
+        upgrades = {
+            ["buy"] = {
+                cost = 1000,
+                earn = 500,
+                time = 15,
+            },
+            ["time"] = {
+                { cost = 1000, bonus = 3 },
+                { cost = 1500, bonus = 4 },
+                { cost = 2000, bonus = 5 },
+            },
+            ["count"] = {
+                { cost = 2000, bonus = 1 },
+            },
+        },
+    },
+
+    {
         name = "aquarium",
+        skin_count = 1,
         hitbox = Hitbox(0, 20, 130, 130),
         animation_full_path = "release_aquarium-clock",
-        sprite_name = "release_aquarium",
+        sprite_name = "alarm_aquarium",
         sprite_name_mini = "aquarium",
         Minigame = FishingMinigame,
 
@@ -187,10 +216,88 @@ config.alarms = {
             },
         },
     },
+
+    {
+        name = "old_fashion",
+        skin_count = 1,
+        hitbox = Hitbox(0, 80, 120, 70),
+        animation_full_path = "release_old_fashion_clock",
+        sprite_name = "alarm_old_fashion",
+        sprite_name_mini = "old_fashion",
+        Minigame = SimpleClickMinigame,
+
+        upgrades = {
+            ["buy"] = {
+                cost = 1000,
+                earn = 500,
+                time = 15,
+            },
+            ["time"] = {
+                { cost = 1000, bonus = 3 },
+                { cost = 1500, bonus = 4 },
+                { cost = 2000, bonus = 5 },
+            },
+            ["count"] = {
+                { cost = 2000, bonus = 1 },
+            },
+        },
+    },
+
+    {
+        name = "crocodile",
+        skin_count = 1,
+        hitbox = Hitbox(0, 80, 70, 70),
+        animation_full_path = "release_crocodile_clock",
+        sprite_name = "alarm_crocodile",
+        sprite_name_mini = "crocodile",
+        Minigame = SimpleClickMinigame,
+
+        upgrades = {
+            ["buy"] = {
+                cost = 1000,
+                earn = 500,
+                time = 15,
+            },
+            ["time"] = {
+                { cost = 1000, bonus = 3 },
+                { cost = 1500, bonus = 4 },
+                { cost = 2000, bonus = 5 },
+            },
+            ["count"] = {
+                { cost = 2000, bonus = 1 },
+            },
+        },
+    },
+
+    {
+        name = "shooting_range",
+        skin_count = 1,
+        hitbox = Hitbox(0, 50, 110, 110),
+        animation_full_path = "release_shooting_range_clock",
+        sprite_name = "alarm_shooting_range",
+        sprite_name_mini = "shooting_range",
+        Minigame = SimpleClickMinigame,
+
+        upgrades = {
+            ["buy"] = {
+                cost = 1000,
+                earn = 500,
+                time = 15,
+            },
+            ["time"] = {
+                { cost = 1000, bonus = 3 },
+                { cost = 1500, bonus = 4 },
+                { cost = 2000, bonus = 5 },
+            },
+            ["count"] = {
+                { cost = 2000, bonus = 1 },
+            },
+        },
+    },
 }
 
 for _, config in ipairs(config.alarms) do
-    config.upgrades["earn"] = { cost = 2 * config.upgrades["buy"].cost, bonus = config.upgrades["buy"].earn }
+    config.upgrades["earn"] = { {cost = 2 * config.upgrades["buy"].cost, bonus = config.upgrades["buy"].earn} }
 end
 
 

@@ -37,11 +37,6 @@ function game.load()
     game.assets.sounds = load_sounds_from_directory("assets/sounds")
     game.assets.images = load_images_from_directory("assets/sprites")
     game.assets.images.grids = {
-        basic_clock = createGrid(150, 150, game.assets.images.alarm_clock_0),
-        digital = createGrid(150, 150, game.assets.images.alarm_digital_0),
-        aquarium = createGrid(150, 150, game.assets.images.alarm_aquarium_0),
-        crab = createGrid(150, 150, game.assets.images.alarm_crab_0),
-
         countdown = createGrid(33, 27, game.assets.images.release_countdown),
         aquarium_clock = createGrid(13, 13, game.assets.images["release_aquarium-clock"]),
         fishing_minigame_window = createGrid(374, 185, game.assets.images.release_box_fishing_minigame),
@@ -53,19 +48,30 @@ function game.load()
 
     local grids = game.assets.images.grids
 
+    game.assets.sounds["crocodile_alarm"] = game.assets.sounds["aquarium_alarm"]:clone()
+    game.assets.sounds["old_fashion_alarm"] = game.assets.sounds["aquarium_alarm"]:clone()
+    game.assets.sounds["bear_alarm"] = game.assets.sounds["aquarium_alarm"]:clone()
+    game.assets.sounds["shooting_range_alarm"] = game.assets.sounds["aquarium_alarm"]:clone()
+
     -- на подумать: ускорить секунды
     game.animations["release_countdown"] = anim8.newAnimation(grids.countdown('1-100', 1), 1)
     game.animations["release_aquarium-clock"] = anim8.newAnimation(grids.aquarium_clock('1-20', 1), 1)
     game.animations["release_clock_clock"] = anim8.newAnimation(grids.clock_clock('1-60', 1), 1)
     game.animations["release_countdown_crab"] = anim8.newAnimation(grids.countdown('1-100', 1), 1)
+    game.animations["release_old_fashion_clock"] = game.animations["release_clock_clock"]:clone()
+    game.animations["release_bear_clock"] = game.animations["release_clock_clock"]:clone()
+    game.animations["release_crocodile_clock"] = game.animations["release_countdown"]:clone()
+    game.animations["release_shooting_range_clock"] = game.animations["release_countdown"]:clone()
 
     game.skins = {}
     for _, config in ipairs(config.alarms) do
-        for skin = 1, config.skin_count do
-            local name = config.sprite_name_mini .. "_" .. skin
-            game.animations[name .. skin .. "_press_in"] = anim8.newAnimation(grids[name]('2-5', 1), 0.1)
-            game.animations[name .. skin .. "_press_out"] = anim8.newAnimation(grids[name]('6-8', 1), 0.1)
-            game.animations[name .. skin .. "_idle"] = anim8.newAnimation(grids[name](1, 1), 1)
+        local name = config.sprite_name_mini
+        print("alarm_" .. name .. "_0")
+        grids[name] = createGrid(150, 150, game.assets.images["alarm_" .. name .. "_0"])
+        for skin = 0, config.skin_count - 1 do
+            game.animations[name .. "_" .. skin .. "_press_in"] = anim8.newAnimation(grids[name]('2-5', 1), 0.1)
+            game.animations[name .. "_" .. skin .. "_press_out"] = anim8.newAnimation(grids[name]('6-8', 1), 0.1)
+            game.animations[name .. "_" .. skin .. "_idle"] = anim8.newAnimation(grids[name](1, 1), 1)
         end
         game.skins[config.name] = 0
     end
@@ -205,7 +211,7 @@ function game.update(dt)
             if button.rpc:intersect_point(mouse_x, mouse_y) then
                 game.player.can_click = true
                 if game.input.mouse.just_pressed then
-                    local upgrade_cost = game.alarm_stats[button.alarm.name].next_count_upgrade_cost
+                    local upgrade_cost = count_cost(button.alarm)
                     if game.bank:has(upgrade_cost) then
                         game.bank:spend(upgrade_cost)
                         game.add_alarm(button.alarm)
@@ -246,12 +252,10 @@ function game.update(dt)
                         button:on_buy()
                         button.bought = true
 
-                        game.skins[button.alarm.name] = (game.skins[button.alarm.name] + 1) % button.alarm.skin_count
-
                         game.alarm_stats[button.alarm.name] = {
                             time = button.alarm.upgrades["buy"].time,
                             earn = button.alarm.upgrades["buy"].earn,
-                            count = 1,
+                            count = 0,
                             time_upgrade_level = 1,
                             earn_upgrade_level = 1,
                             next_count_upgrade_cost = 20,
@@ -397,6 +401,8 @@ function game.add_alarm(config)
     end
     local alarm = Alarm(config, shelf, 120 * (game.alarm.spot % 3), game.skins[config.name])
     game.alarm.spot = game.alarm.spot + 1
+    game.skins[config.name] = (game.skins[config.name] + 1) % config.skin_count
+    game.alarm_stats[config.name].count = game.alarm_stats[config.name].count + 1
     table.insert(game.alarms, alarm)
 end
 

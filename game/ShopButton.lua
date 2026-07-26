@@ -59,11 +59,13 @@ function ShopButton:draw_block(rect, upgrade, minus, maxed_out)
     cost_text.h = 0.25 * self.hitbox.height
     cost_text.y = rect.y + self.hitbox.height - 1.32 * cost_text.h
     local plus = minus and "-" or "+"
+    game.bold = true
     if maxed_out then
         draw_text_inside_rect("MAX", cost_text, 'center')
     else
         draw_text_inside_rect(upgrade.cost .. "$ (" .. plus .. upgrade.bonus .. ")", cost_text, 'center')
     end
+    game.bold = false
 end
 
 function ShopButton:draw(x, y, scale, offset_x)
@@ -107,7 +109,8 @@ function ShopButton:draw(x, y, scale, offset_x)
         icon_rect.h = icon_rect.w
 
         game.bold = false
-        self:draw_block(self.rpc, self.alarm.upgrades["count"][1]) -- TODO?
+
+        self:draw_block(self.rpc, {cost = count_cost(self.alarm), bonus = 1})
         draw_sprite_inside_rect(game.assets.images.UI_icon, icon_rect)
         local count_rect = icon_rect:clone()
         count_rect.x = count_rect.x + self.rpc.w * 0.53
@@ -179,9 +182,9 @@ function ShopButton:draw(x, y, scale, offset_x)
     )
 
     local cost_text_rect = Rect(
-        x + self.hitbox.width * 0.7,
+        x + self.hitbox.width * 0.75,
         y + self.hitbox.height * 0.05,
-        self.hitbox.width * 0.3,
+        self.hitbox.width * 0.2,
         self.hitbox.height * 0.9
     )
 
@@ -191,10 +194,14 @@ function ShopButton:draw(x, y, scale, offset_x)
 
     draw_text_inside_rect("income " .. self.alarm.upgrades["buy"].earn .. "$", text_1_rect)
 
+    draw_text_inside_rect("period " .. self.alarm.upgrades["buy"].earn .. "s", text_2_rect)
+
     local tip_x = x + self.hitbox.width * 0.24
     local y1 = y + self.hitbox.height * 0.17
     local y2 = y1 + self.hitbox.height * 0.39
+    game.bold = true
     draw_text_inside_rect(self.alarm.upgrades["buy"].cost .. "$", cost_text_rect, 'center')
+    game.bold = false
 end
 
 return ShopButton

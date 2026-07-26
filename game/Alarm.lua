@@ -3,22 +3,19 @@ local Alarm = require('libraries.knife.base'):extend()
 function Alarm:constructor(config, shelf, x_position, skin)
     self.config = config
     self.spritesheet = game.assets.images[config.sprite_name .. "_" .. skin]
-    self.sprite = game.animations[config.sprite_name_mini .. "_idle"]
+    self.sprite = game.animations[config.sprite_name_mini .. "_" .. skin .. "_idle"]
     self.pressed = false
     assert(self.sprite, config.sprite_name_mini)
 
-    print(self.config.name)
-    print(self.config.Minigame)
-
-    print(shelf, x_position)
     self.shelf = shelf
     self.x_position = x_position
     self.skin = skin
     self.x_offset = 0
     self.y_offset = 0
 
-    self.press_in_animation = game.animations[self.config.sprite_name_mini .. "_press_in"]:clone()
-    self.press_out_animation = game.animations[self.config.sprite_name_mini .. "_press_out"]:clone()
+    self.press_in_animation = game.animations[self.config.sprite_name_mini .. "_" .. skin .. "_press_in"]:clone()
+    self.press_out_animation = game.animations[self.config.sprite_name_mini .. "_" .. skin .. "_press_out"]:clone()
+    print(self.press_in_animation, self.press_out_animation)
 
     self.pressed_stopwatch = Stopwatch()
 
@@ -95,7 +92,7 @@ function Alarm:on_minigame_done()
     self.sprite = self.press_out_animation
     self.sprite:gotoFrame(1)
     self.sprite.onLoop = function()
-        self.sprite = game.animations[self.config.sprite_name_mini .. "_idle"]
+        self.sprite = game.animations[self.config.sprite_name_mini .. "_" .. self.skin .. "_idle"]
     end
     self.sprite:resume()
 end
