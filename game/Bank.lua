@@ -23,6 +23,9 @@ function Bank:spend(count)
 end
 
 function Bank:earn(amount)
+    if amount == '?' then
+        amount = 0
+    end
     self.money = self.money + amount
 end
 

@@ -286,8 +286,8 @@ config.alarms = {
 
         upgrades = {
             ["buy"] = {
-                cost = 100000,
-                earn = 1000000,
+                cost = 70000,
+                earn = '?',
                 time = 9,
             },
             ["time"] = {
