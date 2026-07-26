@@ -306,13 +306,13 @@ config.alarms = {
 }
 
 for _, config in ipairs(config.alarms) do
-    config.upgrades["earn"] = { {cost = math.floor(1.5 * config.upgrades["buy"].cost), bonus = config.upgrades["buy"].earn} }
+    config.upgrades["earn"] = { {cost = math.floor(3 * config.upgrades["buy"].cost), bonus = config.upgrades["buy"].earn} }
 
     local first = true
     local last_cost = 0
     for i, v in ipairs(config.upgrades["time"]) do
         if not first then
-            v.cost = math.ceil(1.8 * last_cost)
+            v.cost = math.ceil(2 * last_cost)
         end
         if i == #config.upgrades["time"] then
             v.cost = math.ceil(3 * v.cost)
