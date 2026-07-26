@@ -27,6 +27,9 @@ function WalkAroundMinigame:update(dt)
         -- end
     end
 
+    if self.e then
+        self.alarm.x_offset = self.original
+    end
     return self.e
 end
 
