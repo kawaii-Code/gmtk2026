@@ -56,6 +56,8 @@ function ShopButton:draw_block(rect, upgrade, minus, maxed_out)
     draw_sprite_inside_rect(sprite, rect)
 
     local cost_text = rect:clone()
+    cost_text.x = cost_text.x + cost_text.w * 0.1
+    cost_text.w = cost_text.w * 0.8
     cost_text.h = 0.25 * self.hitbox.height
     cost_text.y = rect.y + self.hitbox.height - 1.32 * cost_text.h
     local plus = minus and "-" or "+"
