@@ -10,10 +10,12 @@ function ClickSpriteMinigame:constructor(alarm)
     self.completed = false
 
     self.time = 0
+    self.timer = Timer(0.05, "start")
     self.last_time = 0
 end
 
 function ClickSpriteMinigame:update(dt)
+    self.timer:update(dt)
     self.time = self.time + dt
     if self.time - self.last_time > 0.03 then
         self.offset_x = lume.random(-3, 3)
@@ -27,7 +29,7 @@ function ClickSpriteMinigame:draw(screen_height, mouse)
     love.graphics.draw(self.sprite, self.x + self.offset_x, self.y  + self.offset_y)
     local rect = Rect(self.x + self.offset_x, self.y + self.offset_y, self.sprite:getWidth(), self.sprite:getHeight())
     if rect:intersect_point(mouse.x, mouse.y) then
-        if mouse.just_pressed then
+        if self.timer:done() and mouse.just_pressed then
             self.completed = true
         end
     end
