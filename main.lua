@@ -8,6 +8,7 @@ function love.load()
         scroll = 0,
     }
     game.load()
+    print(config.time_scale)
 end
 
 function love.update()
@@ -24,6 +25,10 @@ end
 
 function love.draw()
     game.draw()
+end
+
+function love.restart(restartarg)
+    config.time_scale = restartarg or 1.1
 end
 
 function love.keypressed(key, scancode, isrepeat)

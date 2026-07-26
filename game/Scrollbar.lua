@@ -42,6 +42,7 @@ function Scrollbar:update(scrollbar_area, visible_height, content_height)
     local rect = self:rect(scrollbar_area)
 
     if rect:intersect_point(game.input.mouse.x, game.input.mouse.y) then
+        game.player.can_click = true
         if game.input.mouse.pressed then
             if not self.getting_scrolled then
                 self.scroll_start_y = game.input.mouse.y

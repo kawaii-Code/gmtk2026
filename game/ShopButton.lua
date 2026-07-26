@@ -130,7 +130,9 @@ function ShopButton:draw(x, y, scale, offset_x)
         if is_time_pre_maxed_out(self.alarm) or is_time_maxed_out(self.alarm) then
             time_rect.x = time_rect.x + self.rac.w * 0.1
             time_rect.w = time_rect.w * 0.8
+            game.bold = true
             draw_text_inside_rect("autoclick", time_rect, 'center')
+            game.bold = false
             time_rect.y = time_rect.y + self.rac.h * 0.3
             draw_text_inside_rect(game.alarm_stats[self.alarm.name].time .. "s", time_rect, 'center')
         else
@@ -196,7 +198,7 @@ function ShopButton:draw(x, y, scale, offset_x)
 
     draw_text_inside_rect("income " .. self.alarm.upgrades["buy"].earn .. "$", text_1_rect)
 
-    draw_text_inside_rect("period " .. self.alarm.upgrades["buy"].earn .. "s", text_2_rect)
+    draw_text_inside_rect("period " .. self.alarm.upgrades["buy"].time .. "s", text_2_rect)
 
     local tip_x = x + self.hitbox.width * 0.24
     local y1 = y + self.hitbox.height * 0.17

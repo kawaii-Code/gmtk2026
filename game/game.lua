@@ -54,8 +54,8 @@ function game.load()
 
     game.assets.sounds["crocodile_alarm"] = game.assets.sounds["aquarium_alarm"]:clone()
     game.assets.sounds["old_fashion_alarm"] = game.assets.sounds["aquarium_alarm"]:clone()
-    game.assets.sounds["bear_alarm"] = game.assets.sounds["aquarium_alarm"]:clone()
     game.assets.sounds["shooting_range_alarm"] = game.assets.sounds["aquarium_alarm"]:clone()
+    game.assets.sounds["bomb_alarm"] = game.assets.sounds["bomb_alarm"]:clone()
 
     -- на подумать: ускорить секунды
     game.animations["release_countdown"] = anim8.newAnimation(grids.countdown('1-100', 1), 1)
@@ -66,6 +66,7 @@ function game.load()
     game.animations["release_bear_clock"] = game.animations["release_clock_clock"]:clone()
     game.animations["release_crocodile_clock"] = game.animations["release_countdown"]:clone()
     game.animations["release_shooting_range_clock"] = game.animations["release_countdown"]:clone()
+    game.animations["release_bomb"] = game.animations["release_countdown"]:clone()
 
     game.skins = {}
     for _, config in ipairs(config.alarms) do
@@ -136,6 +137,17 @@ end
 function game.update(dt)
     lurker.update()
 
+    if game.endgame then
+        game.endgame_timer:update(dt)
+        if game.endgame_timer:done() then
+            if game.input.mouse.just_pressed then
+                love.event.quit("restart")
+            end
+        end
+
+        return
+    end
+
     if not game.assets.music:isPlaying() and not game.assets.music_loop:isPlaying() then
         game.assets.music_loop:play()
     end
@@ -158,6 +170,9 @@ function game.update(dt)
         local x, y = alarm_position(alarm)
 
         local alarm_rect = alarm.config.hitbox:to_rect(x, y)
+        alarm.money_effect_position.x = (alarm_rect.x + 0.5 * alarm_rect.w) * game.alarm.scale + game.alarm.rect.x
+        alarm.money_effect_position.y = alarm_rect.y * game.alarm.scale + game.alarm.rect.y
+
         if not game.minigame and alarm_rect:intersect_point(mouse_x, mouse_y) then
             game.player.can_click = true
             if is_time_maxed_out(alarm.config) then
@@ -208,10 +223,9 @@ function game.update(dt)
     game.alarm.scrollbar:update(alarm_area_scrollbar_area, screen_height / game.alarm.scale, game.alarm.content_height)
 
     for _, button in ipairs(game.shop.buttons) do
-        button:update(dt)
-
         if button.second_mode then
             if button.rpc:intersect_point(mouse_x, mouse_y) then
+                button.hovered = true
                 game.player.can_click = true
                 if game.input.mouse.just_pressed then
                     local upgrade_cost = count_cost(button.alarm)
@@ -222,6 +236,7 @@ function game.update(dt)
                     end
                 end
             elseif button.rac:intersect_point(mouse_x, mouse_y) then
+                button.hovered = true
                 game.player.can_click = true
                 if game.input.mouse.just_pressed and not is_time_maxed_out(button.alarm) then
                     local upgrade = button.alarm.upgrades["time"][game.alarm_stats[button.alarm.name].time_upgrade_level]
@@ -233,6 +248,7 @@ function game.update(dt)
                     end
                 end
             elseif button.rlc:intersect_point(mouse_x, mouse_y) then
+                button.hovered = true
                 game.player.can_click = true
                 if game.input.mouse.just_pressed and not is_earn_maxed_out(button.alarm) then
                     local upgrade = button.alarm.upgrades["earn"][game.alarm_stats[button.alarm.name].earn_upgrade_level]
@@ -243,6 +259,8 @@ function game.update(dt)
                         game.alarm_stats[button.alarm.name].earn_upgrade_level = game.alarm_stats[button.alarm.name].earn_upgrade_level + 1
                     end
                 end
+            else
+                button.hovered = false
             end
         else
             local button_rect = button.hitbox:to_rect(button.position.x, button.position.y)
@@ -273,6 +291,8 @@ function game.update(dt)
                 button.hovered = false
             end
         end
+
+        button:update(dt)
     end
 
     if game.input.mouse.just_pressed then
@@ -287,6 +307,10 @@ function game.update(dt)
             table.insert(game.money_effects, money_effect)
             game.minigame.alarm.timer:reset_with_new_duration(game.alarm_stats[game.minigame.alarm.config.name].time)
             game.minigame.alarm:on_minigame_done()
+            if game.minigame.alarm.config.name == "bomb" then
+                game.endgame = true
+                game.endgame_timer = Timer(1.0, "start")
+            end
             game.minigame = nil
         end
     end
@@ -294,6 +318,15 @@ end
 
 function game.draw()
     local screen_width, screen_height = love.graphics.getDimensions()
+
+    if game.endgame then
+        love.graphics.clear({0, 0, 0, 1})
+        local rect = Rect(screen_width * 0.2, screen_height * 0.3, screen_width * 0.6, screen_height * 0.3)
+        draw_text_inside_rect("Thanks for playing!", rect, 'center', {1,1,1,1})
+        rect.y = rect.y + screen_height * 0.3
+        draw_text_inside_rect("Press the mouse button to play again", rect, 'center', {1,1,1,1})
+        return
+    end
 
     local alarm_area_canvas = game.alarm.canvas
 

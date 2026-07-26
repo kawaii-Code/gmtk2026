@@ -9,6 +9,7 @@ OFFSETS = {
     ["release_crocodile_clock"] = { x = 8, y = 100, frame_count = 100 },
     ["release_shooting_range_clock"] = { x = 50, y = 106, frame_count = 100 },
     ["release_bear_clock"] = { x = 23, y = 84, frame_count = 60 },
+    ["release_bomb"] = { x = 45, y = 106, frame_count = 100 },
 }
 
 function AlarmDisplay:constructor(animation_full_path)
@@ -61,7 +62,6 @@ function AlarmDisplay:update(dt)
 end
 
 function AlarmDisplay:draw(x, y)
-    print(self.animation_full_path, game.assets.images[self.animation_full_path], game.assets.images[self.animation_full_path]:getWidth())
     local ox = x + OFFSETS[self.animation_full_path].x
     local oy = self.offset_y + y + OFFSETS[self.animation_full_path].y
     self.animation:draw(game.assets.images[self.animation_full_path], ox, oy)

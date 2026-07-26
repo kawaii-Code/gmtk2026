@@ -63,7 +63,7 @@ config.shop = {
 
 config.shop_horizontal_screen_percentage = 0.4
 
-config.starting_money = 10
+config.starting_money = 100000
 
 config.cursor_size = 0.12
 
@@ -80,6 +80,8 @@ config.scrollbar_fg = {r, g, b, a}--config.font_color
 
 config.scrollbar_width = 25
 
+
+config.time_scale = 1.2
 
 -- В каком порядке они здесь, в таком же порядке будут и в магазине
 -- СЛАВЕ: наверное удобнее будет создавать апгрейды не вручную здесь
@@ -267,6 +269,29 @@ config.alarms = {
             },
             ["time"] = {
                 { cost = 100000, bonus = 5 },
+                { cost = 0, bonus = 5 },
+                { cost = 0, bonus = 5 },
+            },
+        },
+    },
+
+    {
+        name = "bomb",
+        skin_count = 1,
+        hitbox = Hitbox(0, 50, 110, 110),
+        animation_full_path = "release_bomb",
+        sprite_name = "alarm_bomb",
+        sprite_name_mini = "bomb",
+        Minigame = SimpleClickMinigame,
+
+        upgrades = {
+            ["buy"] = {
+                cost = 100000,
+                earn = 1000000,
+                time = 1,
+            },
+            ["time"] = {
+                { cost = 10000000, bonus = 5 },
                 { cost = 0, bonus = 5 },
                 { cost = 0, bonus = 5 },
             },

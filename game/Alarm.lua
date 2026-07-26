@@ -1,11 +1,11 @@
 local Alarm = require('libraries.knife.base'):extend()
 
-function Alarm:constructor(config, shelf, x_position, skin)
-    self.config = config
-    self.spritesheet = game.assets.images[config.sprite_name .. "_" .. skin]
-    self.sprite = game.animations[config.sprite_name_mini .. "_" .. skin .. "_idle"]
+function Alarm:constructor(c, shelf, x_position, skin)
+    self.config = c
+    self.spritesheet = game.assets.images[c.sprite_name .. "_" .. skin]
+    self.sprite = game.animations[c.sprite_name_mini .. "_" .. skin .. "_idle"]
     self.pressed = false
-    assert(self.sprite, config.sprite_name_mini)
+    assert(self.sprite, c.sprite_name_mini)
 
     self.shelf = shelf
     self.x_position = x_position
@@ -13,20 +13,21 @@ function Alarm:constructor(config, shelf, x_position, skin)
     self.x_offset = 0
     self.y_offset = 0
 
+    self.money_effect_position = {x = 0, y = 0}
+
     self.press_in_animation = game.animations[self.config.sprite_name_mini .. "_" .. skin .. "_press_in"]:clone()
     self.press_out_animation = game.animations[self.config.sprite_name_mini .. "_" .. skin .. "_press_out"]:clone()
-    print(self.press_in_animation, self.press_out_animation)
 
     self.pressed_stopwatch = Stopwatch()
 
-    self.display = AlarmDisplay(config.animation_full_path)
+    self.display = AlarmDisplay(c.animation_full_path)
 
     self.timer = Timer(game.alarm_stats[self.config.name].time, "start")
     self.timer_done_last_frame = false
 end
 
 function Alarm:update(dt)
-    self.timer:update(dt)
+    self.timer:update(config.time_scale * dt)
     self.display:update(dt)
     self.pressed_stopwatch:update(dt)
 
@@ -38,7 +39,7 @@ function Alarm:update(dt)
             self:on_press(function()
                 local earn = game.alarm_stats[self.config.name].earn
                 game.bank:earn(earn)
-                local money_effect = MoneyEffect(game.input.mouse.x, game.input.mouse.y, earn)
+                local money_effect = MoneyEffect(self.money_effect_position.x, self.money_effect_position.y, earn)
                 table.insert(game.money_effects, money_effect)
                 self.timer:reset_with_new_duration(game.alarm_stats[self.config.name].time)
                 self:on_minigame_done()

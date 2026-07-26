@@ -74,7 +74,7 @@ function draw_sprite(e)
     end
 end
 
-function draw_text_inside_rect(text, rect, align, color)
+function draw_text_inside_rect(text, rect, align, color, r)
     align = align or 'left'
     color = color or config.font_color
 
@@ -104,10 +104,10 @@ function draw_text_inside_rect(text, rect, align, color)
 
     love.graphics.setColor(color)
     if align == 'left' then
-        love.graphics.print(text, large_enough_font, rect.x, rect.y + 0.5 * (rect.h - font_height))
+        love.graphics.print(text, large_enough_font, rect.x, rect.y + 0.5 * (rect.h - font_height), r)
     elseif align == 'center' then
         local text_width = large_enough_font:getWidth(text)
-        love.graphics.print(text, large_enough_font, rect.x + 0.5 * (rect.w - text_width), rect.y + 0.5 * (rect.h - large_enough_font:getHeight()))
+        love.graphics.print(text, large_enough_font, rect.x + 0.5 * (rect.w - text_width), rect.y + 0.5 * (rect.h - large_enough_font:getHeight()), r)
     else
         error('align')
     end

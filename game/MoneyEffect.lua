@@ -5,6 +5,7 @@ function MoneyEffect:constructor(x, y, amount)
     self.y = y
     self.amount = amount
     self.timer = Timer(2.0, "start")
+    self.rotation = lume.random(-3.14/6, 3.14/6)
 end
 
 SPEED = 10
@@ -18,10 +19,10 @@ function MoneyEffect:update(dt)
 end
 
 function MoneyEffect:draw()
-    local w = game.shop.rect.w * 0.1
+    local w = game.shop.rect.w * 0.16
     local h = w
     local rect = Rect(self.x - 0.5 * w, self.y - 0.5 * h, w, h)
-    draw_text_inside_rect("+" .. self.amount .. "$", rect, 'center', config.money_effect_color)
+    draw_text_inside_rect("+" .. self.amount .. "$", rect, 'center', config.money_effect_color, self.rotation)
 end
 
 return MoneyEffect
