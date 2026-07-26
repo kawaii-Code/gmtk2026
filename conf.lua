@@ -56,7 +56,7 @@ config.min_font_size = 8
 config.max_font_size = 72
 
 config.shop_button_hover_scale = 1.05
-config.scroll_strength = 0.01 -- 1% за один микро-прокрутку колеса
+config.scroll_strength = 0.01--/108 -- 1% за один микро-прокрутку колеса
 
 config.shop = {
     margin_left = 0.03,

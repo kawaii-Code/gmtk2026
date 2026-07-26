@@ -210,6 +210,7 @@ function game.update(dt)
     end
 
     if cursor_in_shop then
+
         game.shop.scrollbar.scroll = game.shop.scrollbar.scroll - config.scroll_strength * game.input.mouse.scroll
         game.shop.scrollbar.scroll = math.clamp(game.shop.scrollbar.scroll, 0, 1)
     else
@@ -314,6 +315,8 @@ function game.update(dt)
             game.minigame = nil
         end
     end
+
+    game.mouse_scroll = game.input.mouse.scroll
 end
 
 function game.draw()
