@@ -252,28 +252,28 @@ config.alarms = {
         },
     },
 
-    {
-        name = "shooting_range",
-        skin_count = 1,
-        hitbox = Hitbox(0, 50, 110, 110),
-        animation_full_path = "release_shooting_range_clock",
-        sprite_name = "alarm_shooting_range",
-        sprite_name_mini = "shooting_range",
-        Minigame = SimpleClickMinigame,
+    -- {
+    --     name = "shooting_range",
+    --     skin_count = 1,
+    --     hitbox = Hitbox(0, 50, 110, 110),
+    --     animation_full_path = "release_shooting_range_clock",
+    --     sprite_name = "alarm_shooting_range",
+    --     sprite_name_mini = "shooting_range",
+    --     Minigame = SimpleClickMinigame,
 
-        upgrades = {
-            ["buy"] = {
-                cost = 70000,
-                earn = 10000,
-                time = 40,
-            },
-            ["time"] = {
-                { cost = 100000, bonus = 5 },
-                { cost = 0, bonus = 5 },
-                { cost = 0, bonus = 5 },
-            },
-        },
-    },
+    --     upgrades = {
+    --         ["buy"] = {
+    --             cost = 70000,
+    --             earn = 10000,
+    --             time = 40,
+    --         },
+    --         ["time"] = {
+    --             { cost = 100000, bonus = 5 },
+    --             { cost = 0, bonus = 5 },
+    --             { cost = 0, bonus = 5 },
+    --         },
+    --     },
+    -- },
 
     {
         name = "bomb",
@@ -288,7 +288,7 @@ config.alarms = {
             ["buy"] = {
                 cost = 100000,
                 earn = 1000000,
-                time = 1,
+                time = 9,
             },
             ["time"] = {
                 { cost = 10000000, bonus = 5 },
