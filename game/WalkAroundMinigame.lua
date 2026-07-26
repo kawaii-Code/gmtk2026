@@ -7,6 +7,8 @@ function WalkAroundMinigame:constructor(alarm)
     self.original = alarm.x_offset
     self.timer = Timer(0.25, "start")
 
+    self.catch_me_png = game.assets.images.catch_me
+
     self.e = false
 
     game.assets.sounds.crab_small_snap:play()
@@ -34,7 +36,10 @@ function WalkAroundMinigame:draw(screen_height, mouse)
 
     rect.y = rect.y - 40
     game.bold = true
-    draw_text_inside_rect("CATCH ME!", rect, 'center')
+    -- draw_text_inside_rect("CATCH ME!", rect, 'center')
+
+    love.graphics.draw(self.catch_me_png, rect.x, rect.y+12)
+
     game.bold = false
     rect.y = rect.y + 40
 

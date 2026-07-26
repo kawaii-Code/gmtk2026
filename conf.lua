@@ -65,7 +65,7 @@ config.shop = {
 
 config.shop_horizontal_screen_percentage = 0.4
 
-config.starting_money = 100000
+config.starting_money = 100
 
 config.cursor_size = 0.12
 
