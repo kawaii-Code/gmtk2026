@@ -11,6 +11,8 @@ ShopButton = require('game.ShopButton')
 MoneyEffect = require('game.MoneyEffect')
 Scrollbar = require('game.Scrollbar')
 SimpleClickMinigame = require('game.SimpleClickMinigame')
+ClickSpriteMinigame = require('game.ClickSpriteMinigame')
+WalkAroundMinigame = require('game.WalkAroundMinigame')
 FishingMinigame = require('game.FishingMinigame')
 Bank = require('game.Bank')
 
@@ -77,6 +79,8 @@ config.scrollbar_bg = config.shop_bg_color
 config.money_effect_color = {0, 1, 0, 1}
 r,g,b,a = lume.color("#7d7390")
 config.scrollbar_fg = {r, g, b, a}--config.font_color
+r,g,b,a = lume.color("#ebaebc")
+config.crabs = {r,g,b,a}
 
 config.scrollbar_width = 25
 
@@ -144,7 +148,7 @@ config.alarms = {
         animation_full_path = "release_countdown_crab",
         sprite_name = "alarm_crab",
         sprite_name_mini = "crab",
-        Minigame = SimpleClickMinigame,
+        Minigame = WalkAroundMinigame,
 
         upgrades = {
             ["buy"] = {
@@ -166,7 +170,8 @@ config.alarms = {
         animation_full_path = "release_bear_clock",
         sprite_name = "alarm_bear",
         sprite_name_mini = "bear",
-        Minigame = SimpleClickMinigame,
+
+        Minigame = ClickSpriteMinigame,
 
         upgrades = {
             ["buy"] = {

@@ -404,7 +404,14 @@ function game.draw_alarm_area()
             end
             love.graphics.draw(sprite, rect.x + 0.5 * (rect.w - sprite:getWidth()), rect.y + 0.5 * (rect.h - sprite:getHeight()))
         end
-        -- love.graphics.rectangle('line', rect.x, rect.y, rect.w, rect.h)
+    end
+
+    for _, alarm in ipairs(game.alarms) do
+        local x, y = alarm_position(alarm)
+        if alarm.config.name == "crab" then
+            alarm.sprite:draw(alarm.spritesheet, x, y)
+            alarm.display:draw(x, y)
+        end
     end
 end
 
