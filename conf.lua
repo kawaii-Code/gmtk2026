@@ -71,9 +71,9 @@ config.cursor_size = 0.12
 
 local r,g,b,a = lume.color("#474152")
 config.font_color = {r, g, b, a}
-r,g,b,a = lume.color("#CBBFCF")
-config.shop_bg_color = {r, g, b, a}
 r,g,b,a = lume.color("#f4d2cd")
+config.shop_bg_color = {r, g, b, a}
+r,g,b,a = lume.color("#ffe8dc")
 config.bg_color = {r, g, b, a}
 config.scrollbar_bg = config.shop_bg_color
 config.money_effect_color = {0, 1, 0, 1}
