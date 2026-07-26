@@ -56,7 +56,7 @@ config.min_font_size = 8
 config.max_font_size = 72
 
 config.shop_button_hover_scale = 1.05
-config.scroll_strength = 0.01--/108 -- 1% за один микро-прокрутку колеса
+config.scroll_strength = 0.01/108 -- 1% за один микро-прокрутку колеса
 
 config.shop = {
     margin_left = 0.03,
@@ -310,9 +310,12 @@ for _, config in ipairs(config.alarms) do
 
     local first = true
     local last_cost = 0
-    for _, v in ipairs(config.upgrades["time"]) do
+    for i, v in ipairs(config.upgrades["time"]) do
         if not first then
             v.cost = math.ceil(1.8 * last_cost)
+        end
+        if i == #config.upgrades["time"] then
+            v.cost = math.ceil(3 * v.cost)
         end
         last_cost = v.cost
         first = false

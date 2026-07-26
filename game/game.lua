@@ -397,6 +397,14 @@ function game.draw_alarm_area()
 
     for _, alarm in ipairs(game.alarms) do
         local x, y = alarm_position(alarm)
+        if alarm.config.name == "crab" then
+            alarm.sprite:draw(alarm.spritesheet, x, y)
+            alarm.display:draw(x, y)
+        end
+    end
+
+    for _, alarm in ipairs(game.alarms) do
+        local x, y = alarm_position(alarm)
         alarm.sprite:draw(alarm.spritesheet, x, y)
         alarm.display:draw(x, y)
         local rect = alarm.config.hitbox:to_rect(x, y)
@@ -406,14 +414,6 @@ function game.draw_alarm_area()
                 sprite = game.assets.images.autoclick_press
             end
             love.graphics.draw(sprite, rect.x + 0.5 * (rect.w - sprite:getWidth()), rect.y + 0.5 * (rect.h - sprite:getHeight()))
-        end
-    end
-
-    for _, alarm in ipairs(game.alarms) do
-        local x, y = alarm_position(alarm)
-        if alarm.config.name == "crab" then
-            alarm.sprite:draw(alarm.spritesheet, x, y)
-            alarm.display:draw(x, y)
         end
     end
 end
