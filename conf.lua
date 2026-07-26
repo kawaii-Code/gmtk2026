@@ -88,9 +88,12 @@ config.alarms = {
     {
         name = "basic_clock",
         hitbox = Hitbox(0, 70, 75, 80),
+
+        skin_count = 3,
         animation_full_path = "release_clock_clock",
         sprite_name = "release_clock",
         sprite_name_mini = "basic_clock",
+
         Minigame = SimpleClickMinigame,
 
         upgrades = {
@@ -103,11 +106,6 @@ config.alarms = {
                 { cost = 5, bonus = 1 }, -- -1 секунда времени за 10 бачей
                 { cost = 10, bonus = 1 },
                 { cost = 20, bonus = 1 },
-            },
-            ["earn"] = {
-                { cost = 10, bonus = 5 }, -- +5 дохода за 20 бачей
-                { cost = 20, bonus = 5 },
-                { cost = 40, bonus = 5 },
             },
             ["count"] = {
                 { cost = 50, bonus = 1 }, -- специальная хрень
@@ -134,11 +132,6 @@ config.alarms = {
                 { cost = 10, bonus = 1 },
                 { cost = 10, bonus = 1 },
             },
-            ["earn"] = {
-                { cost = 20, bonus = 5 }, -- +5 дохода за 20 бачей
-                { cost = 20, bonus = 5 },
-                { cost = 20, bonus = 5 },
-            },
             ["count"] = {
                 { cost = 20, bonus = 1 }, -- специальная хрень
             },
@@ -163,11 +156,6 @@ config.alarms = {
                 { cost = 1000, bonus = 3 },
                 { cost = 1500, bonus = 4 },
                 { cost = 2000, bonus = 5 },
-            },
-            ["earn"] = {
-                { cost = 1000, bonus = 500 },
-                { cost = 6942, bonus = 750 },
-                { cost = 9999, bonus = 1000 },
             },
             ["count"] = {
                 { cost = 2000, bonus = 1 },
@@ -194,17 +182,16 @@ config.alarms = {
                 { cost = 10, bonus = 1 },
                 { cost = 10, bonus = 1 },
             },
-            ["earn"] = {
-                { cost = 20, bonus = 5 }, -- +5 дохода за 20 бачей
-                { cost = 20, bonus = 5 },
-                { cost = 20, bonus = 5 },
-            },
             ["count"] = {
                 { cost = 20, bonus = 1 }, -- специальная хрень
             },
         },
     },
 }
+
+for _, config in ipairs(config.alarms) do
+    config.upgrades["earn"] = { cost = 2 * config.upgrades["buy"].cost, bonus = config.upgrades["buy"].earn }
+end
 
 
 config.mouse_scroll_strength = 10

@@ -1,8 +1,8 @@
 local Alarm = require('libraries.knife.base'):extend()
 
-function Alarm:constructor(config, shelf, x_position)
+function Alarm:constructor(config, shelf, x_position, skin)
     self.config = config
-    self.spritesheet = game.assets.images[config.sprite_name]
+    self.spritesheet = game.assets.images[config.sprite_name .. "_" .. skin]
     self.sprite = game.animations[config.sprite_name_mini .. "_idle"]
     self.pressed = false
     assert(self.sprite, config.sprite_name_mini)
@@ -13,6 +13,7 @@ function Alarm:constructor(config, shelf, x_position)
     print(shelf, x_position)
     self.shelf = shelf
     self.x_position = x_position
+    self.skin = skin
     self.x_offset = 0
     self.y_offset = 0
 
