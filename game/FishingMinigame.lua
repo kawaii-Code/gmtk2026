@@ -42,11 +42,24 @@ function FishingMinigame:constructor(alarm)
             -- win — застывает в победном положении
     }
 
+    self.fish.x = math.random(self.fish.min_x, self.fish.max_x)
+    self.float.x = math.random(self.fish.min_x, self.fish.max_x)
+    self.fish.is_go_left = math.random() > 0.5
+    self.float.is_go_left = math.random() > 0.5
+
+    if self.fish.is_go_left then
+        self.fish.sprite = game.animations["fish_left"]
+    else
+        self.fish.sprite = game.animations["fish_right"]
+    end
+
     self.X = 10
     self.Y = 50
 
     self.status = 'game'
         -- 'win'
+
+    self.win_timer = 0.9
 end
 
 function FishingMinigame:draw_fishing_line(x, y1, y2)
@@ -139,11 +152,13 @@ function FishingMinigame:update(dt)
 
     if rect:intersect_point(self.float.x, self.float.y) then
         self:set_win_status()
+        game.assets.sounds.win_minigame:play()
     end
 
     if self.status == 'win' then
-        game.assets.sounds.win_minigame:play()
-        return true
+        -- game.assets.sounds.win_minigame:play()
+        self.win_timer = self.win_timer - dt
+        return self.win_timer <= 0
     end
 
     return self.completed
